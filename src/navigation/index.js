@@ -1,8 +1,9 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {useUser} from '../contexts/UserContext';
+import {View} from 'react-native';
 
 // Ekranlar
 import SplashScreen from '../screens/SplashScreen/SplashScreen';
@@ -19,9 +20,9 @@ const Tab = createBottomTabNavigator();
 const MainTabNavigator = () => {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Trade" component={TradeScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{title: 'Ana Sayfa'}} />
+      <Tab.Screen name="Trade" component={TradeScreen} options={{title: 'Takaslarım'}} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{title: 'Profil'}} />
     </Tab.Navigator>
   );
 };
@@ -29,9 +30,20 @@ const MainTabNavigator = () => {
 // Ana navigasyon
 const AppNavigator = () => {
   const {user, isLoading} = useUser();
+  const [showSplash, setShowSplash] = useState(true);
 
-  if (isLoading) {
-    return <SplashScreen />;
+  // Eğer isLoading değişirse, splash ekranını göster
+  useEffect(() => {
+    if (!isLoading) {
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
+
+  if (isLoading || showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
   return (

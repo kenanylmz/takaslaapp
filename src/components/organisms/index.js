@@ -1,0 +1,1 @@
+// Organizma bileşenlerimiz buradan export edilecek 

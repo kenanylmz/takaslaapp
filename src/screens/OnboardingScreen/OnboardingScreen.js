@@ -2,7 +2,6 @@ import React, {useState, useRef} from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
   Image,
   Dimensions,
@@ -11,6 +10,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTheme} from '../../contexts/ThemeContext';
+import styles from '../../styles/onboarding/onboardingStyles';
 
 const {width, height} = Dimensions.get('window');
 
@@ -19,20 +19,23 @@ const onboardingData = [
   {
     id: '1',
     title: 'Kullanmadığın Eşyalarını Değerlendir',
-    description: 'Artık kullanmadığın eşyalarını Takasla ile değerlendirerek yeni eşyalara sahip ol.',
-    image: require('../../assets/onboarding1.jpg'),
+    description:
+      'Artık kullanmadığın eşyalarını Takasla ile değerlendirerek yeni eşyalara sahip ol.',
+    image: require('../../assets/onboarding1.png'),
   },
   {
     id: '2',
     title: 'Güvenli Takas İmkanı',
-    description: 'Takasla platformu ile güvenli ve kolay bir şekilde eşyalarını takas edebilirsin.',
-    image: require('../../assets/onboarding2.jpg'),
+    description:
+      'Takasla platformu ile güvenli ve kolay bir şekilde eşyalarını takas edebilirsin.',
+    image: require('../../assets/onboarding2.png'),
   },
   {
     id: '3',
     title: 'Çevreci Yaklaşım',
-    description: 'Takas yaparak hem ekonomik tasarruf sağla hem de çevreye katkıda bulun.',
-    image: require('../../assets/onboarding3.jpg'),
+    description:
+      'Takas yaparak hem ekonomik tasarruf sağla hem de çevreye katkıda bulun.',
+    image: require('../../assets/onboarding3.png'),
   },
 ];
 
@@ -120,7 +123,8 @@ const OnboardingScreen = ({navigation}) => {
   };
 
   return (
-    <View style={[styles.container, {backgroundColor: theme.colors.background}]}>
+    <View
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <FlatList
         data={onboardingData}
         renderItem={renderItem}
@@ -162,77 +166,4 @@ const OnboardingScreen = ({navigation}) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  slide: {
-    width,
-    paddingTop: 50,
-    paddingBottom: 80,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-  },
-  image: {
-    width: width * 0.8,
-    height: height * 0.4,
-    resizeMode: 'contain',
-    marginBottom: 30,
-    borderRadius: 10,
-  },
-  textContainer: {
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  description: {
-    fontSize: 16,
-    textAlign: 'center',
-    paddingHorizontal: 20,
-    lineHeight: 24,
-  },
-  paginationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    height: 40,
-    alignItems: 'center',
-  },
-  dot: {
-    height: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  bottomContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    paddingHorizontal: 20,
-    paddingBottom: 30,
-    paddingTop: 10,
-  },
-  skipButton: {
-    padding: 15,
-    borderWidth:.7,
-    borderRadius: 10,
-    width: 100,
-    alignItems: 'center',
-  },
-  nextButton: {
-    padding: 15,
-    borderRadius: 10,
-    width: 100,
-    alignItems: 'center',
-  },
-  nextButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-});
-
-export default OnboardingScreen; 
+export default OnboardingScreen;

@@ -1,8 +1,7 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback, useMemo} from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
   Alert,
@@ -14,6 +13,7 @@ import {
 } from 'react-native';
 import {useTheme} from '../../contexts/ThemeContext';
 import {useUser} from '../../contexts/UserContext';
+import styles from '../../styles/auth/loginStyles';
 
 const LoginScreen = ({navigation}) => {
   const {theme} = useTheme();
@@ -22,47 +22,22 @@ const LoginScreen = ({navigation}) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-  
-  // Animasyon değerleri
-  const fadeAnim = new Animated.Value(0);
-  const moveAnim = new Animated.Value(50);
-  
-  useEffect(() => {
-    // Klavye gösterildiğinde/gizlendiğinde dinleyiciler
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        setKeyboardVisible(true);
-      }
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        setKeyboardVisible(false);
-      }
-    );
-    
-    // Giriş animasyonu
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(moveAnim, {
-        toValue: 0,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start();
 
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, [fadeAnim, moveAnim]);
+  // Animasyon değerleri - useMemo kullanarak render optimize et
+  const fadeAnim = useMemo(() => new Animated.Value(0), []);
+  const moveAnim = useMemo(() => new Animated.Value(50), []);
 
-  const handleLogin = async () => {
+  // Input değişim işleyicilerini optimize et
+  const handleEmailChange = useCallback(text => {
+    setEmail(text);
+  }, []);
+
+  const handlePasswordChange = useCallback(text => {
+    setPassword(text);
+  }, []);
+
+  // Giriş işleyicisini optimize et
+  const handleLogin = useCallback(async () => {
     if (!email || !password) {
       Alert.alert('Hata', 'Lütfen tüm alanları doldurun');
       return;
@@ -87,23 +62,97 @@ const LoginScreen = ({navigation}) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [email, password, login]);
+
+  // Kayıt ekranına gitme işleyicisi
+  const goToRegister = useCallback(() => {
+    navigation.navigate('Register');
+  }, [navigation]);
+
+  // Şifremi unuttum ekranına gitme işleyicisi
+  const goToForgotPassword = useCallback(() => {
+    navigation.navigate('ForgotPassword');
+  }, [navigation]);
+
+  useEffect(() => {
+    // Klavye gösterildiğinde/gizlendiğinde dinleyiciler
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true);
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+      },
+    );
+
+    // Giriş animasyonu
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(moveAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, [fadeAnim, moveAnim]);
+
+  // Stil memoization
+  const containerStyle = useMemo(
+    () => [styles.container, {backgroundColor: theme.colors.background}],
+    [theme],
+  );
+
+  const logoContainerStyle = useMemo(
+    () => [
+      styles.logoContainer,
+      {
+        opacity: fadeAnim,
+        transform: [{translateY: moveAnim}],
+        display: keyboardVisible ? 'none' : 'flex',
+      },
+    ],
+    [fadeAnim, moveAnim, keyboardVisible],
+  );
+
+  const formContainerStyle = useMemo(
+    () => [
+      styles.formContainer,
+      {
+        opacity: fadeAnim,
+        transform: [{translateY: moveAnim}],
+      },
+    ],
+    [fadeAnim, moveAnim],
+  );
+
+  const buttonStyle = useMemo(
+    () => [
+      styles.button,
+      {backgroundColor: theme.colors.primary},
+      isLoading && {opacity: 0.7},
+    ],
+    [theme, isLoading],
+  );
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View
-        style={[styles.container, {backgroundColor: theme.colors.background}]}>
-        <Animated.View 
-          style={[
-            styles.logoContainer, 
-            {
-              opacity: fadeAnim,
-              transform: [{translateY: moveAnim}],
-              display: keyboardVisible ? 'none' : 'flex'
-            }
-          ]}>
+      <View style={containerStyle}>
+        <Animated.View style={logoContainerStyle}>
           <Image
-            source={require('../../assets/logo.jpg')}
+            source={require('../../assets/logo.png')}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -111,25 +160,20 @@ const LoginScreen = ({navigation}) => {
             Takasla
           </Text>
         </Animated.View>
-        
-        <Animated.View 
-          style={[
-            styles.formContainer, 
-            {
-              opacity: fadeAnim,
-              transform: [{translateY: moveAnim}]
-            }
-          ]}>
-          <Text style={[styles.title, {color: theme.colors.text}]}>
-            Giriş Yap
-          </Text>
-          <Text style={[styles.subtitle, {color: theme.colors.gray}]}>
-            Hesabınıza erişim sağlayın
-          </Text>
 
+        <Animated.View style={formContainerStyle}>
           <View style={styles.inputContainer}>
+            <Text style={[styles.title, {color: theme.colors.text}]}>
+              Hoş Geldiniz
+            </Text>
+            <Text style={[styles.subtitle, {color: theme.colors.gray}]}>
+              Hesabınıza giriş yapın
+            </Text>
+
             <View style={styles.inputWrapper}>
-              <Text style={[styles.inputLabel, {color: theme.colors.text}]}>E-posta</Text>
+              <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
+                E-posta Adresi
+              </Text>
               <TextInput
                 style={[
                   styles.input,
@@ -139,17 +183,19 @@ const LoginScreen = ({navigation}) => {
                     borderColor: theme.colors.border,
                   },
                 ]}
-                placeholder="E-posta adresiniz"
+                placeholder="E-posta adresinizi girin"
                 placeholderTextColor={theme.colors.gray}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={handleEmailChange}
               />
             </View>
 
             <View style={styles.inputWrapper}>
-              <Text style={[styles.inputLabel, {color: theme.colors.text}]}>Şifre</Text>
+              <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
+                Şifre
+              </Text>
               <TextInput
                 style={[
                   styles.input,
@@ -159,25 +205,23 @@ const LoginScreen = ({navigation}) => {
                     borderColor: theme.colors.border,
                   },
                 ]}
-                placeholder="Şifreniz"
+                placeholder="Şifrenizi girin"
                 placeholderTextColor={theme.colors.gray}
                 secureTextEntry
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={handlePasswordChange}
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.forgotPassword}
-                onPress={() => navigation.navigate('ForgotPassword')}>
-                <Text style={{color: theme.colors.primary}}>Şifremi Unuttum</Text>
+                onPress={goToForgotPassword}>
+                <Text style={{color: theme.colors.primary}}>
+                  Şifremi Unuttum
+                </Text>
               </TouchableOpacity>
             </View>
 
             <TouchableOpacity
-              style={[
-                styles.button,
-                {backgroundColor: theme.colors.primary},
-                isLoading && {opacity: 0.7},
-              ]}
+              style={buttonStyle}
               onPress={handleLogin}
               disabled={isLoading}>
               <Text style={styles.buttonText}>
@@ -188,7 +232,7 @@ const LoginScreen = ({navigation}) => {
 
           <View style={styles.footer}>
             <Text style={{color: theme.colors.gray}}>Hesabınız yok mu? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+            <TouchableOpacity onPress={goToRegister}>
               <Text style={{color: theme.colors.primary, fontWeight: 'bold'}}>
                 Kayıt Ol
               </Text>
@@ -200,85 +244,4 @@ const LoginScreen = ({navigation}) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 20,
-  },
-  logo: {
-    width: 120,
-    height: 120,
-    marginBottom: 10,
-  },
-  logoText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  formContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingBottom: 40,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    marginBottom: 30,
-  },
-  inputContainer: {
-    width: '100%',
-    marginBottom: 20,
-  },
-  inputWrapper: {
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 14,
-    marginBottom: 8,
-    fontWeight: '500',
-  },
-  input: {
-    height: 56,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    fontSize: 16,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  button: {
-    height: 56,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 30,
-  },
-});
-
-export default LoginScreen; 
+export default LoginScreen;

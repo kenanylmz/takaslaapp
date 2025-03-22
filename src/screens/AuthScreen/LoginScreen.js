@@ -165,7 +165,9 @@ const LoginScreen = ({navigation}) => {
                 value={password}
                 onChangeText={setPassword}
               />
-              <TouchableOpacity style={styles.forgotPassword}>
+              <TouchableOpacity 
+                style={styles.forgotPassword}
+                onPress={() => navigation.navigate('ForgotPassword')}>
                 <Text style={{color: theme.colors.primary}}>Şifremi Unuttum</Text>
               </TouchableOpacity>
             </View>

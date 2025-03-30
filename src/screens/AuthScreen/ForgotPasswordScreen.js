@@ -13,12 +13,15 @@ import {
 } from 'react-native';
 import {useTheme} from '../../contexts/ThemeContext';
 import styles from '../../styles/auth/forgotPasswordStyles';
+import {useUser} from '../../contexts/UserContext';
 
 const ForgotPasswordScreen = ({navigation}) => {
   const {theme} = useTheme();
+  const {forgotPassword, error} = useUser();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
+  const [resetError, setResetError] = useState('');
 
   // Animasyon değerleri - useRef kullanarak yeniden render'ı engelle
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
@@ -30,7 +33,7 @@ const ForgotPasswordScreen = ({navigation}) => {
   }, []);
 
   // Şifre sıfırlama işleyicisini optimize et
-  const handleResetPassword = useCallback(() => {
+  const handleResetPassword = useCallback(async () => {
     if (!email) {
       Alert.alert('Hata', 'Lütfen e-posta adresinizi girin');
       return;
@@ -44,13 +47,27 @@ const ForgotPasswordScreen = ({navigation}) => {
     }
 
     setIsLoading(true);
+    setResetError('');
 
-    // Örnek şifre sıfırlama işlemi - gerçek bir API bağlantısı eklenecek
-    setTimeout(() => {
+    try {
+      const success = await forgotPassword(email);
+
+      if (success) {
+        setIsEmailSent(true);
+      } else {
+        setResetError(
+          error || 'Şifre sıfırlama işlemi sırasında bir sorun oluştu',
+        );
+      }
+    } catch (err) {
+      setResetError(
+        'Şifre sıfırlama işlemi sırasında beklenmeyen bir hata oluştu',
+      );
+      console.error(err);
+    } finally {
       setIsLoading(false);
-      setIsEmailSent(true);
-    }, 2000);
-  }, [email]);
+    }
+  }, [email, forgotPassword, error]);
 
   // Giriş sayfasına dönüş işleyicisi
   const goToLoginScreen = useCallback(() => {
@@ -170,6 +187,17 @@ const ForgotPasswordScreen = ({navigation}) => {
                 </Text>
               </TouchableOpacity>
             </View>
+
+            {resetError ? (
+              <Text
+                style={{
+                  color: theme.colors.danger,
+                  marginTop: 10,
+                  textAlign: 'center',
+                }}>
+                {resetError}
+              </Text>
+            ) : null}
           </Animated.View>
         ) : (
           <Animated.View style={successContainerStyle}>

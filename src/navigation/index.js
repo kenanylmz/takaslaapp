@@ -12,6 +12,7 @@ import OnboardingScreen from '../screens/OnboardingScreen/OnboardingScreen';
 import LoginScreen from '../screens/AuthScreen/LoginScreen';
 import RegisterScreen from '../screens/AuthScreen/RegisterScreen';
 import ForgotPasswordScreen from '../screens/AuthScreen/ForgotPasswordScreen';
+import ProfileScreen from '../screens/ProfileScreen/ProfileScreen';
 
 const Stack = createStackNavigator();
 

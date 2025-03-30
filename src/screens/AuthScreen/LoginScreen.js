@@ -17,11 +17,12 @@ import styles from '../../styles/auth/loginStyles';
 
 const LoginScreen = ({navigation}) => {
   const {theme} = useTheme();
-  const {login} = useUser();
+  const {login, error} = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   // Animasyon değerleri - useMemo kullanarak render optimize et
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
@@ -39,30 +40,26 @@ const LoginScreen = ({navigation}) => {
   // Giriş işleyicisini optimize et
   const handleLogin = useCallback(async () => {
     if (!email || !password) {
-      Alert.alert('Hata', 'Lütfen tüm alanları doldurun');
+      Alert.alert('Hata', 'Lütfen e-posta ve şifrenizi girin');
       return;
     }
 
     setIsLoading(true);
+    setLoginError('');
 
-    // Örnek login işlemi - gerçek bir API bağlantısı eklenecek
     try {
-      const userData = {
-        id: 1,
-        email,
-        name: 'Test Kullanıcı',
-      };
+      const success = await login(email, password);
 
-      const success = await login(userData);
       if (!success) {
-        Alert.alert('Hata', 'Giriş yapılırken bir sorun oluştu');
+        setLoginError(error || 'Giriş yapılırken bir sorun oluştu');
       }
-    } catch (error) {
-      Alert.alert('Hata', 'Giriş yapılırken bir sorun oluştu');
+    } catch (err) {
+      setLoginError('Giriş yapılırken beklenmeyen bir hata oluştu');
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
-  }, [email, password, login]);
+  }, [email, password, login, error]);
 
   // Kayıt ekranına gitme işleyicisi
   const goToRegister = useCallback(() => {
@@ -219,6 +216,17 @@ const LoginScreen = ({navigation}) => {
                 </Text>
               </TouchableOpacity>
             </View>
+
+            {loginError ? (
+              <Text
+                style={{
+                  color: theme.colors.danger,
+                  marginTop: 10,
+                  textAlign: 'center',
+                }}>
+                {loginError}
+              </Text>
+            ) : null}
 
             <TouchableOpacity
               style={buttonStyle}

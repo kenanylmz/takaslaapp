@@ -18,12 +18,13 @@ import styles from '../../styles/auth/registerStyles';
 
 const RegisterScreen = ({navigation}) => {
   const {theme} = useTheme();
-  const {login} = useUser();
+  const {register, error} = useUser();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [registerError, setRegisterError] = useState('');
 
   // Animasyon değerleri
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
@@ -59,29 +60,21 @@ const RegisterScreen = ({navigation}) => {
     }
 
     setIsLoading(true);
+    setRegisterError('');
 
-    // Örnek kayıt işlemi - gerçek bir API bağlantısı eklenecek
     try {
-      // Kullanıcı kayıt başarılı olduğunda
-      setTimeout(async () => {
-        const userData = {
-          id: 1,
-          name,
-          email,
-        };
+      const success = await register(name, email, password);
 
-        // Kullanıcıyı otomatik olarak giriş yap
-        const success = await login(userData);
-        if (!success) {
-          Alert.alert('Hata', 'Giriş yapılırken bir sorun oluştu');
-        }
-        setIsLoading(false);
-      }, 1500);
-    } catch (error) {
-      Alert.alert('Hata', 'Kayıt olurken bir sorun oluştu');
+      if (!success) {
+        setRegisterError(error || 'Kayıt olurken bir sorun oluştu');
+      }
+    } catch (err) {
+      setRegisterError('Kayıt olurken beklenmeyen bir hata oluştu');
+      console.error(err);
+    } finally {
       setIsLoading(false);
     }
-  }, [name, email, password, confirmPassword, login]);
+  }, [name, email, password, confirmPassword, register, error]);
 
   // Giriş sayfasına gitme işleyicisi
   const goToLogin = useCallback(() => {
@@ -246,6 +239,17 @@ const RegisterScreen = ({navigation}) => {
                 {isLoading ? 'Kaydediliyor...' : 'Kayıt Ol'}
               </Text>
             </TouchableOpacity>
+
+            {registerError ? (
+              <Text
+                style={{
+                  color: theme.colors.danger,
+                  marginTop: 10,
+                  textAlign: 'center',
+                }}>
+                {registerError}
+              </Text>
+            ) : null}
 
             <Text style={[styles.termsText, {color: theme.colors.gray}]}>
               Kayıt olarak, Takasla'nın{' '}

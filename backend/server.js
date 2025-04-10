@@ -15,16 +15,16 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
-// Statik dosyalar için klasör
+// Statik dosyalar için klasörler - uploads klasörünü doğru şekilde ayarlayalım
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Uploads klasörlerini oluştur
 const fs = require('fs');
 const uploadDir = path.join(__dirname, 'uploads/profiles');
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+  fs.mkdirSync(uploadDir, {recursive: true});
 }
 
 // Routes
@@ -40,4 +40,4 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server ${PORT} numaralı portta çalışıyor`);
-}); 
+});

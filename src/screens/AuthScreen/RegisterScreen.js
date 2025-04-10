@@ -47,7 +47,7 @@ const RegisterScreen = ({navigation}) => {
     setConfirmPassword(text);
   }, []);
 
-  // Kayıt işleyicisini optimize et
+  // Kayıt işleyicisini düzenleyelim
   const handleRegister = useCallback(async () => {
     if (!name || !email || !password || !confirmPassword) {
       Alert.alert('Hata', 'Lütfen tüm alanları doldurun');
@@ -65,7 +65,19 @@ const RegisterScreen = ({navigation}) => {
     try {
       const success = await register(name, email, password);
 
-      if (!success) {
+      if (success) {
+        // Kayıt başarılı olduğunda alert göster
+        Alert.alert(
+          'Kayıt Başarılı',
+          'Hesabınız başarıyla oluşturuldu. Giriş yapabilirsiniz.',
+          [
+            {
+              text: 'Tamam',
+              onPress: () => navigation.navigate('Login'),
+            },
+          ],
+        );
+      } else {
         setRegisterError(error || 'Kayıt olurken bir sorun oluştu');
       }
     } catch (err) {
@@ -74,7 +86,7 @@ const RegisterScreen = ({navigation}) => {
     } finally {
       setIsLoading(false);
     }
-  }, [name, email, password, confirmPassword, register, error]);
+  }, [name, email, password, confirmPassword, register, error, navigation]);
 
   // Giriş sayfasına gitme işleyicisi
   const goToLogin = useCallback(() => {

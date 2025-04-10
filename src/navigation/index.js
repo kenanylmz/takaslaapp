@@ -1,10 +1,18 @@
 import React, {useState, useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useUser} from '../contexts/UserContext';
 import {useTheme} from '../contexts/ThemeContext';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // Ekranlar
 import SplashScreen from '../screens/SplashScreen/SplashScreen';
@@ -15,6 +23,7 @@ import ForgotPasswordScreen from '../screens/AuthScreen/ForgotPasswordScreen';
 import ProfileScreen from '../screens/ProfileScreen/ProfileScreen';
 
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 
 // Temporary Dashboard Screen - HomeScreen, ProfileScreen, TradeScreen olmadığı için
 const TemporaryDashboard = () => {
@@ -40,6 +49,78 @@ const TemporaryDashboard = () => {
   );
 };
 
+// Ana Tab Navigator
+const MainNavigator = () => {
+  const {theme} = useTheme();
+
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.gray,
+        tabBarStyle: {
+          backgroundColor: theme.colors.white,
+          borderTopWidth: 1,
+          borderTopColor: theme.colors.border,
+          paddingBottom: 5,
+          height: 60,
+        },
+      }}>
+      <Tab.Screen
+        name="Home"
+        component={TemporaryDashboard}
+        options={{
+          tabBarLabel: 'Ana Sayfa',
+          tabBarIcon: ({color, size}) => (
+            <Icon name="home" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Search"
+        component={TemporaryDashboard}
+        options={{
+          tabBarLabel: 'Keşfet',
+          tabBarIcon: ({color, size}) => (
+            <Icon name="magnify" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Add"
+        component={TemporaryDashboard}
+        options={{
+          tabBarLabel: 'Ekle',
+          tabBarIcon: ({color, size}) => (
+            <Icon name="plus-circle" color={color} size={28} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Messages"
+        component={TemporaryDashboard}
+        options={{
+          tabBarLabel: 'Mesajlar',
+          tabBarIcon: ({color, size}) => (
+            <Icon name="message-text" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: 'Profil',
+          tabBarIcon: ({color, size}) => (
+            <Icon name="account" color={color} size={size} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+};
+
 // Ana navigasyon
 const AppNavigator = () => {
   const {user, isLoading} = useUser();
@@ -47,11 +128,23 @@ const AppNavigator = () => {
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
 
+  // Konsola çıktı ekleyelim - debugging için
+  useEffect(() => {
+    console.log('Navigation State:', {
+      user: user ? 'logged in' : 'logged out',
+      isLoading,
+      showSplash,
+      hasSeenOnboarding,
+      isCheckingOnboarding,
+    });
+  }, [user, isLoading, showSplash, hasSeenOnboarding, isCheckingOnboarding]);
+
   // Onboarding durumunu kontrol et
   useEffect(() => {
     const checkOnboarding = async () => {
       try {
         const value = await AsyncStorage.getItem('hasSeenOnboarding');
+        console.log('Onboarding durumu:', value);
         if (value === 'true') {
           setHasSeenOnboarding(true);
         }
@@ -68,25 +161,37 @@ const AppNavigator = () => {
     checkOnboarding();
   }, []);
 
-  // Splash ekranı zamanlayıcısı
+  // Splash ekranı zamanlayıcısı - sadece uygulama ilk açıldığında gösterilsin
   useEffect(() => {
     if (!isLoading && !isCheckingOnboarding) {
       const timer = setTimeout(() => {
+        console.log('Splash ekranı kapatılıyor...');
         setShowSplash(false);
-      }, 3000);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [isLoading, isCheckingOnboarding]);
 
-  if (isLoading || isCheckingOnboarding || showSplash) {
+  // Sadece uygulama ilk açıldığında splash göster
+  if (showSplash && !isLoading && !isCheckingOnboarding) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
+
+  // Yükleme durumunda loading göster
+  if (isLoading || isCheckingOnboarding) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color="#4A80F0" />
+        <Text style={{marginTop: 10}}>Yükleniyor...</Text>
+      </View>
+    );
   }
 
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerShown: false}}>
         {user ? (
-          <Stack.Screen name="Dashboard" component={TemporaryDashboard} />
+          <Stack.Screen name="Main" component={MainNavigator} />
         ) : (
           <>
             {!hasSeenOnboarding && (

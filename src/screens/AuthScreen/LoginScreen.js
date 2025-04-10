@@ -10,6 +10,7 @@ import {
   TouchableWithoutFeedback,
   Animated,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import {useTheme} from '../../contexts/ThemeContext';
 import {useUser} from '../../contexts/UserContext';
@@ -31,16 +32,25 @@ const LoginScreen = ({navigation}) => {
   // Input değişim işleyicilerini optimize et
   const handleEmailChange = useCallback(text => {
     setEmail(text);
+    setLoginError('');
   }, []);
 
   const handlePasswordChange = useCallback(text => {
     setPassword(text);
+    setLoginError('');
   }, []);
 
-  // Giriş işleyicisini optimize et
+  // Giriş işleyicisi
   const handleLogin = useCallback(async () => {
     if (!email || !password) {
-      Alert.alert('Hata', 'Lütfen e-posta ve şifrenizi girin');
+      Alert.alert('Hata', 'Email ve şifre alanlarını doldurun');
+      return;
+    }
+
+    // Email formatı kontrolü
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Hata', 'Geçerli bir email adresi girin');
       return;
     }
 
@@ -50,29 +60,36 @@ const LoginScreen = ({navigation}) => {
     try {
       const success = await login(email, password);
 
-      if (!success) {
-        setLoginError(error || 'Giriş yapılırken bir sorun oluştu');
+      if (success) {
+        // Başarılı giriş durumunda uyarı göster
+        Alert.alert(
+          'Giriş Başarılı',
+          'Hoş geldiniz! Ana sayfaya yönlendiriliyorsunuz.',
+          [{text: 'Tamam'}],
+        );
+      } else {
+        setLoginError(error || 'Giriş yaparken bir sorun oluştu');
       }
     } catch (err) {
-      setLoginError('Giriş yapılırken beklenmeyen bir hata oluştu');
+      setLoginError('Giriş yaparken beklenmeyen bir hata oluştu');
       console.error(err);
     } finally {
       setIsLoading(false);
     }
   }, [email, password, login, error]);
 
-  // Kayıt ekranına gitme işleyicisi
+  // Kayıt olma sayfasına yönlendirme
   const goToRegister = useCallback(() => {
     navigation.navigate('Register');
   }, [navigation]);
 
-  // Şifremi unuttum ekranına gitme işleyicisi
+  // Şifremi unuttum sayfasına yönlendirme
   const goToForgotPassword = useCallback(() => {
     navigation.navigate('ForgotPassword');
   }, [navigation]);
 
+  // Klavye olaylarını dinle
   useEffect(() => {
-    // Klavye gösterildiğinde/gizlendiğinde dinleyiciler
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
       () => {
@@ -86,7 +103,14 @@ const LoginScreen = ({navigation}) => {
       },
     );
 
-    // Giriş animasyonu
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
+  // Giriş animasyonu
+  useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -99,47 +123,39 @@ const LoginScreen = ({navigation}) => {
         useNativeDriver: true,
       }),
     ]).start();
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
   }, [fadeAnim, moveAnim]);
 
-  // Stil memoization
+  // Stil değişkenlerini hesapla
   const containerStyle = useMemo(
-    () => [styles.container, {backgroundColor: theme.colors.background}],
+    () => [
+      styles.container,
+      {
+        backgroundColor: theme.colors.background,
+      },
+    ],
     [theme],
   );
 
-  const logoContainerStyle = useMemo(
+  const inputStyle = useMemo(
     () => [
-      styles.logoContainer,
+      styles.input,
       {
-        opacity: fadeAnim,
-        transform: [{translateY: moveAnim}],
-        display: keyboardVisible ? 'none' : 'flex',
+        borderColor: theme.colors.border,
+        backgroundColor: theme.colors.white,
+        color: theme.colors.text,
       },
     ],
-    [fadeAnim, moveAnim, keyboardVisible],
-  );
-
-  const formContainerStyle = useMemo(
-    () => [
-      styles.formContainer,
-      {
-        opacity: fadeAnim,
-        transform: [{translateY: moveAnim}],
-      },
-    ],
-    [fadeAnim, moveAnim],
+    [theme],
   );
 
   const buttonStyle = useMemo(
     () => [
       styles.button,
-      {backgroundColor: theme.colors.primary},
-      isLoading && {opacity: 0.7},
+      {
+        backgroundColor: isLoading
+          ? theme.colors.lightGray
+          : theme.colors.primary,
+      },
     ],
     [theme, isLoading],
   );
@@ -147,7 +163,7 @@ const LoginScreen = ({navigation}) => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={containerStyle}>
-        <Animated.View style={logoContainerStyle}>
+        <View style={styles.logoContainer}>
           <Image
             source={require('../../assets/logo.png')}
             style={styles.logo}
@@ -156,72 +172,60 @@ const LoginScreen = ({navigation}) => {
           <Text style={[styles.logoText, {color: theme.colors.primary}]}>
             Takasla
           </Text>
-        </Animated.View>
+        </View>
 
-        <Animated.View style={formContainerStyle}>
+        <Animated.View
+          style={[
+            styles.formContainer,
+            {opacity: fadeAnim, transform: [{translateY: moveAnim}]},
+          ]}>
+          <Text style={[styles.title, {color: theme.colors.text}]}>
+            Giriş Yap
+          </Text>
+          <Text style={[styles.subtitle, {color: theme.colors.gray}]}>
+            Hesabınıza giriş yaparak takasa başlayın
+          </Text>
+
           <View style={styles.inputContainer}>
-            <Text style={[styles.title, {color: theme.colors.text}]}>
-              Hoş Geldiniz
+            <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
+              E-posta
             </Text>
-            <Text style={[styles.subtitle, {color: theme.colors.gray}]}>
-              Hesabınıza giriş yapın
+            <TextInput
+              style={inputStyle}
+              placeholder="E-posta adresiniz"
+              placeholderTextColor={theme.colors.gray}
+              value={email}
+              onChangeText={handleEmailChange}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
+              Şifre
             </Text>
+            <TextInput
+              style={inputStyle}
+              placeholder="Şifreniz"
+              placeholderTextColor={theme.colors.gray}
+              value={password}
+              onChangeText={handlePasswordChange}
+              secureTextEntry
+            />
+            <TouchableOpacity
+              style={styles.forgotPassword}
+              onPress={goToForgotPassword}>
+              <Text style={{color: theme.colors.primary}}>Şifremi Unuttum</Text>
+            </TouchableOpacity>
+          </View>
 
-            <View style={styles.inputWrapper}>
-              <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
-                E-posta Adresi
-              </Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: theme.colors.white,
-                    color: theme.colors.dark,
-                    borderColor: theme.colors.border,
-                  },
-                ]}
-                placeholder="E-posta adresinizi girin"
-                placeholderTextColor={theme.colors.gray}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={handleEmailChange}
-              />
-            </View>
-
-            <View style={styles.inputWrapper}>
-              <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
-                Şifre
-              </Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: theme.colors.white,
-                    color: theme.colors.dark,
-                    borderColor: theme.colors.border,
-                  },
-                ]}
-                placeholder="Şifrenizi girin"
-                placeholderTextColor={theme.colors.gray}
-                secureTextEntry
-                value={password}
-                onChangeText={handlePasswordChange}
-              />
-              <TouchableOpacity
-                style={styles.forgotPassword}
-                onPress={goToForgotPassword}>
-                <Text style={{color: theme.colors.primary}}>
-                  Şifremi Unuttum
-                </Text>
-              </TouchableOpacity>
-            </View>
-
+          <View style={{width: '100%', marginTop: 20}}>
             {loginError ? (
               <Text
                 style={{
                   color: theme.colors.danger,
-                  marginTop: 10,
+                  marginBottom: 10,
                   textAlign: 'center',
                 }}>
                 {loginError}
@@ -232,9 +236,11 @@ const LoginScreen = ({navigation}) => {
               style={buttonStyle}
               onPress={handleLogin}
               disabled={isLoading}>
-              <Text style={styles.buttonText}>
-                {isLoading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
-              </Text>
+              {isLoading ? (
+                <ActivityIndicator color={theme.colors.white} size="small" />
+              ) : (
+                <Text style={styles.buttonText}>Giriş Yap</Text>
+              )}
             </TouchableOpacity>
           </View>
 

@@ -21,6 +21,8 @@ import LoginScreen from '../screens/AuthScreen/LoginScreen';
 import RegisterScreen from '../screens/AuthScreen/RegisterScreen';
 import ForgotPasswordScreen from '../screens/AuthScreen/ForgotPasswordScreen';
 import ProfileScreen from '../screens/ProfileScreen/ProfileScreen';
+import MyListingsScreen from '../screens/ListingScreen/MyListingsScreen';
+import CreateListingScreen from '../screens/ListingScreen/CreateListingScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -46,6 +48,20 @@ const TemporaryDashboard = () => {
         <Text style={styles.buttonText}>Çıkış Yap</Text>
       </TouchableOpacity>
     </View>
+  );
+};
+
+// Listing Stack Navigator
+const ListingStack = createStackNavigator();
+const ListingNavigator = () => {
+  return (
+    <ListingStack.Navigator screenOptions={{headerShown: false}}>
+      <ListingStack.Screen name="MyListings" component={MyListingsScreen} />
+      <ListingStack.Screen
+        name="CreateListing"
+        component={CreateListingScreen}
+      />
+    </ListingStack.Navigator>
   );
 };
 
@@ -88,10 +104,10 @@ const MainNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Add"
-        component={TemporaryDashboard}
+        name="Listing"
+        component={ListingNavigator}
         options={{
-          tabBarLabel: 'Ekle',
+          tabBarLabel: 'İlanlarım',
           tabBarIcon: ({color, size}) => (
             <Icon name="plus-circle" color={color} size={28} />
           ),

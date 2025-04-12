@@ -1,8 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Wi-Fi adaptörünüzün gerçek IP adresi
-const API_URL = 'http://10.192.189.239:3001/api';
+// Wi-Fi adaptörünüzün gerçek IP adresi - bunu değiştirin
+const API_URL = 'http://192.168.64.217:3001/api';
 
 // Axios instance oluştur
 const api = axios.create({
@@ -133,6 +133,101 @@ export const profileService = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    return response.data;
+  },
+};
+
+// İlan servisleri
+export const listingService = {
+  // Tüm ilanları getir
+  getListings: async () => {
+    const response = await api.get('/listings');
+    return response.data;
+  },
+
+  // Kullanıcının kendi ilanlarını getir
+  getMyListings: async () => {
+    const response = await api.get('/listings/my/listings');
+    return response.data;
+  },
+
+  // İlan detayını getir
+  getListingById: async id => {
+    const response = await api.get(`/listings/${id}`);
+    return response.data;
+  },
+
+  // Yeni ilan oluştur
+  createListing: async listingData => {
+    const formData = new FormData();
+
+    // İlan bilgileri
+    formData.append('title', listingData.title);
+    formData.append('category', listingData.category);
+    formData.append('description', listingData.description);
+    formData.append('city', listingData.city);
+    formData.append('condition', listingData.condition);
+
+    // Resimler
+    if (listingData.images && listingData.images.length > 0) {
+      listingData.images.forEach((image, index) => {
+        formData.append('images', {
+          uri: image.uri,
+          type: 'image/jpeg',
+          name: `image-${index}.jpg`,
+        });
+      });
+    }
+
+    const response = await api.post('/listings', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // İlan güncelle
+  updateListing: async (id, listingData) => {
+    const formData = new FormData();
+
+    // İlan bilgileri
+    formData.append('title', listingData.title);
+    formData.append('category', listingData.category);
+    formData.append('description', listingData.description);
+    formData.append('city', listingData.city);
+    formData.append('condition', listingData.condition);
+
+    // Yeni eklenen resimler
+    if (listingData.newImages && listingData.newImages.length > 0) {
+      listingData.newImages.forEach((image, index) => {
+        formData.append('images', {
+          uri: image.uri,
+          type: 'image/jpeg',
+          name: `image-${index}.jpg`,
+        });
+      });
+    }
+
+    const response = await api.put(`/listings/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // İlan sil
+  deleteListing: async id => {
+    const response = await api.delete(`/listings/${id}`);
+    return response.data;
+  },
+
+  // Resim sil
+  deleteImage: async (listingId, imageName) => {
+    const response = await api.delete(
+      `/listings/${listingId}/image/${imageName}`,
+    );
     return response.data;
   },
 };

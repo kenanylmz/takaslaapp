@@ -13,7 +13,11 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: '*', // Tüm kaynaklara izin ver (geliştirme için)
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
@@ -27,9 +31,16 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, {recursive: true});
 }
 
+// Listings klasörü için uploads klasörü
+const listingsUploadDir = path.join(__dirname, 'uploads/listings');
+if (!fs.existsSync(listingsUploadDir)) {
+  fs.mkdirSync(listingsUploadDir, {recursive: true});
+}
+
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/profile', require('./routes/profileRoutes'));
+app.use('/api/listings', require('./routes/listingRoutes'));
 
 // Root endpoint
 app.get('/', (req, res) => {

@@ -23,6 +23,7 @@ import ForgotPasswordScreen from '../screens/AuthScreen/ForgotPasswordScreen';
 import ProfileScreen from '../screens/ProfileScreen/ProfileScreen';
 import MyListingsScreen from '../screens/ListingScreen/MyListingsScreen';
 import CreateListingScreen from '../screens/ListingScreen/CreateListingScreen';
+import EditListingScreen from '../screens/ListingScreen/EditListingScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -61,6 +62,7 @@ const ListingNavigator = () => {
         name="CreateListing"
         component={CreateListingScreen}
       />
+      <ListingStack.Screen name="EditListing" component={EditListingScreen} />
     </ListingStack.Navigator>
   );
 };

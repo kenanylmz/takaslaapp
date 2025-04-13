@@ -201,18 +201,13 @@ const MyListingsScreen = ({navigation}) => {
         </View>
       </View>
 
-      <View style={styles.cardActions}>
+      <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={[
-            styles.actionButton,
-            {backgroundColor: theme.colors.primary + '10'},
-          ]}
-          onPress={() => handleEditListing(item)}>
-          <Icon name="pencil" size={20} color={theme.colors.primary} />
-          <Text
-            style={[styles.actionButtonText, {color: theme.colors.primary}]}>
-            Düzenle
-          </Text>
+          style={[styles.editButton, {backgroundColor: theme.colors.secondary}]}
+          onPress={() =>
+            navigation.navigate('EditListing', {listingId: item._id})
+          }>
+          <Text style={styles.buttonText}>Düzenle</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -234,14 +229,51 @@ const MyListingsScreen = ({navigation}) => {
     <View
       style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, {color: theme.colors.text}]}>
-          İlanlarım
-        </Text>
+        <View style={styles.headerTitleContainer}>
+          <Text style={[styles.headerTitle, {color: theme.colors.text}]}>
+            İlanlarım
+          </Text>
+          <Text style={[styles.headerSubtitle, {color: theme.colors.gray}]}>
+            {listings.length} aktif ilan
+          </Text>
+        </View>
         <TouchableOpacity
-          style={[styles.addButton, {backgroundColor: theme.colors.primary}]}
+          style={[
+            styles.addButton,
+            {
+              backgroundColor: theme.colors.primary,
+              shadowColor: theme.colors.primary,
+              shadowOffset: {width: 0, height: 4},
+              shadowOpacity: 0.3,
+              shadowRadius: 5,
+              elevation: 6,
+            },
+          ]}
           onPress={() => navigation.navigate('CreateListing')}>
-          <Icon name="plus" size={24} color="white" />
+          <Icon name="plus" size={20} color="white" />
           <Text style={styles.addButtonText}>Yeni İlan</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={[styles.filterBar, {backgroundColor: theme.colors.white}]}>
+        <TouchableOpacity
+          style={[styles.filterButton, {borderColor: theme.colors.border}]}
+          onPress={() => {
+            /* filter işlevi */
+          }}>
+          <Icon name="filter-variant" size={16} color={theme.colors.gray} />
+          <Text style={{color: theme.colors.gray, marginLeft: 4}}>
+            Filtrele
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.filterButton, {borderColor: theme.colors.border}]}
+          onPress={() => {
+            /* sort işlevi */
+          }}>
+          <Icon name="sort" size={16} color={theme.colors.gray} />
+          <Text style={{color: theme.colors.gray, marginLeft: 4}}>Sırala</Text>
         </TouchableOpacity>
       </View>
 
@@ -297,22 +329,55 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
+    paddingVertical: 8,
+  },
+  headerTitleContainer: {
+    flex: 1,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 14,
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   addButtonText: {
     color: 'white',
     fontWeight: 'bold',
-    marginLeft: 4,
+    marginLeft: 6,
+  },
+  filterBar: {
+    flexDirection: 'row',
+    borderRadius: 10,
+    marginBottom: 16,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderRadius: 20,
+    marginRight: 10,
   },
   listContainer: {
     paddingBottom: 20,
@@ -321,10 +386,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     padding: 0,
     overflow: 'hidden',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
   cardHeader: {
     padding: 16,
-    paddingBottom: 8,
+    paddingBottom: 12,
   },
   cardTitle: {
     fontSize: 18,
@@ -334,12 +405,14 @@ const styles = StyleSheet.create({
   badgeContainer: {
     flexDirection: 'row',
     marginBottom: 8,
+    flexWrap: 'wrap',
   },
   badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
     marginRight: 8,
+    marginBottom: 4,
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -385,10 +458,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginLeft: 4,
   },
-  cardActions: {
+  buttonContainer: {
     flexDirection: 'row',
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
+  },
+  editButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  buttonText: {
+    marginLeft: 8,
+    fontWeight: '500',
   },
   actionButton: {
     flex: 1,
@@ -407,9 +491,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 40,
     paddingVertical: 100,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 5},
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginTop: 16,
     marginBottom: 8,

@@ -119,7 +119,7 @@ const updateListing = async (req, res) => {
   }
 };
 
-// @desc    İlanı sil (sadece status'ü deleted olarak işaretler)
+// @desc    İlanı sil
 // @route   DELETE /api/listings/:id
 // @access  Private
 const deleteListing = async (req, res) => {
@@ -135,12 +135,8 @@ const deleteListing = async (req, res) => {
       return res.status(401).json({message: 'Bu işlem için yetkiniz yok'});
     }
 
-    // İlanı silmek yerine status'ü delete olarak işaretle
-    listing = await Listing.findByIdAndUpdate(
-      req.params.id,
-      {status: 'deleted'},
-      {new: true},
-    );
+    // İlanı tamamen sil
+    await Listing.findByIdAndDelete(req.params.id);
 
     res.json({message: 'İlan başarıyla silindi'});
   } catch (error) {

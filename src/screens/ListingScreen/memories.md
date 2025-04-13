@@ -19,3 +19,13 @@
 - [2024-07-24] Form validasyonu ve hata gösterimi eklendi.
 - [2024-07-24] API entegrasyonu yapıldı, yeni ilan oluşturma işlemi çalışıyor.
 - [2024-07-24] Loading durumu ve başarılı işlem bildirimi eklendi.
+
+## EditListingScreen
+
+- [2024-07-25] İlan düzenleme ekranı oluşturuldu.
+- [2024-07-25] Mevcut ilan verilerini otomatik olarak dolduran form hazırlandı.
+- [2024-07-25] Mevcut resimleri gösterme ve silme özelliği eklendi.
+- [2024-07-25] Yeni resim ekleme özelliği (galeri ve kamera desteği).
+- [2024-07-25] API entegrasyonu ile ilan güncelleme işlevi eklendi.
+- [2024-07-25] Silinen ve yeni eklenen resimlerin ayrı takibi yapıldı.
+- [2024-07-25] Form validasyonu ve hata gösterimi eklendi.

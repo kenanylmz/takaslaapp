@@ -9,6 +9,8 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  Modal,
+  FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
@@ -28,16 +30,89 @@ const CATEGORIES = [
 
 const CONDITIONS = ['Yeni', 'Yeni Gibi', 'İyi', 'Az Kullanılmış', 'Yıpranmış'];
 
-const CITIES = [
-  'İstanbul',
-  'Ankara',
-  'İzmir',
-  'Bursa',
-  'Antalya',
+// Şehir seçenekleri - Türkiye'nin 81 ili
+const cityOptions = [
   'Adana',
-  'Konya',
+  'Adıyaman',
+  'Afyonkarahisar',
+  'Ağrı',
+  'Amasya',
+  'Ankara',
+  'Antalya',
+  'Artvin',
+  'Aydın',
+  'Balıkesir',
+  'Bilecik',
+  'Bingöl',
+  'Bitlis',
   'Bolu',
-  'Diğer',
+  'Burdur',
+  'Bursa',
+  'Çanakkale',
+  'Çankırı',
+  'Çorum',
+  'Denizli',
+  'Diyarbakır',
+  'Edirne',
+  'Elazığ',
+  'Erzincan',
+  'Erzurum',
+  'Eskişehir',
+  'Gaziantep',
+  'Giresun',
+  'Gümüşhane',
+  'Hakkari',
+  'Hatay',
+  'Isparta',
+  'Mersin',
+  'İstanbul',
+  'İzmir',
+  'Kars',
+  'Kastamonu',
+  'Kayseri',
+  'Kırklareli',
+  'Kırşehir',
+  'Kocaeli',
+  'Konya',
+  'Kütahya',
+  'Malatya',
+  'Manisa',
+  'Kahramanmaraş',
+  'Mardin',
+  'Muğla',
+  'Muş',
+  'Nevşehir',
+  'Niğde',
+  'Ordu',
+  'Rize',
+  'Sakarya',
+  'Samsun',
+  'Siirt',
+  'Sinop',
+  'Sivas',
+  'Tekirdağ',
+  'Tokat',
+  'Trabzon',
+  'Tunceli',
+  'Şanlıurfa',
+  'Uşak',
+  'Van',
+  'Yozgat',
+  'Zonguldak',
+  'Aksaray',
+  'Bayburt',
+  'Karaman',
+  'Kırıkkale',
+  'Batman',
+  'Şırnak',
+  'Bartın',
+  'Ardahan',
+  'Iğdır',
+  'Yalova',
+  'Karabük',
+  'Kilis',
+  'Osmaniye',
+  'Düzce',
 ];
 
 const CreateListingScreen = ({navigation}) => {
@@ -55,6 +130,13 @@ const CreateListingScreen = ({navigation}) => {
   const [showCityPicker, setShowCityPicker] = useState(false);
 
   const scrollViewRef = useRef();
+
+  // Picker bileşeni için değişkenler
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const [pickerType, setPickerType] = useState('');
+  const [pickerTitle, setPickerTitle] = useState('');
+  const [pickerOptions, setPickerOptions] = useState([]);
+  const [pickerCurrentValue, setPickerCurrentValue] = useState('');
 
   // Form doğrulama
   const validateForm = () => {
@@ -195,67 +277,41 @@ const CreateListingScreen = ({navigation}) => {
     }
   };
 
-  // Picker bileşeni
-  const Picker = ({
-    visible,
-    title,
-    options,
-    selectedValue,
-    onSelect,
-    onClose,
-  }) => {
-    if (!visible) return null;
+  // Picker modalını aç
+  const openPicker = (type, title, options, currentValue) => {
+    setPickerType(type);
+    setPickerTitle(title);
+    setPickerOptions(options);
+    setPickerCurrentValue(currentValue);
+    setPickerVisible(true);
+  };
 
-    return (
-      <View
-        style={[styles.pickerContainer, {backgroundColor: theme.colors.white}]}>
-        <View style={styles.pickerHeader}>
-          <Text style={[styles.pickerTitle, {color: theme.colors.text}]}>
-            {title}
-          </Text>
-          <TouchableOpacity onPress={onClose}>
-            <Icon name="close" size={24} color={theme.colors.text} />
-          </TouchableOpacity>
-        </View>
-        <ScrollView style={styles.pickerOptions}>
-          {options.map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.pickerOption,
-                selectedValue === option && {
-                  backgroundColor: theme.colors.primary + '10',
-                },
-              ]}
-              onPress={() => {
-                onSelect(option);
-                onClose();
-              }}>
-              <Text
-                style={[
-                  styles.pickerOptionText,
-                  {
-                    color:
-                      selectedValue === option
-                        ? theme.colors.primary
-                        : theme.colors.text,
-                  },
-                ]}>
-                {option}
-              </Text>
-              {selectedValue === option && (
-                <Icon name="check" size={20} color={theme.colors.primary} />
-              )}
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-    );
+  // Seçim değerini güncelle
+  const handleSelect = value => {
+    setPickerVisible(false);
+
+    switch (pickerType) {
+      case 'category':
+        setCategory(value);
+        setErrors({...errors, category: undefined});
+        break;
+      case 'city':
+        setCity(value);
+        setErrors({...errors, city: undefined});
+        break;
+      case 'condition':
+        setCondition(value);
+        setErrors({...errors, condition: undefined});
+        break;
+      default:
+        break;
+    }
   };
 
   return (
     <View
       style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      {/* Geri butonu ve başlık */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -265,238 +321,359 @@ const CreateListingScreen = ({navigation}) => {
         <Text style={[styles.headerTitle, {color: theme.colors.text}]}>
           Yeni İlan Oluştur
         </Text>
-        <View style={{width: 24}} />
+        <View style={{width: 24}} /> {/* Balance the header */}
       </View>
 
-      <ScrollView
-        ref={scrollViewRef}
-        style={styles.scrollView}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}>
-        {/* Başlık */}
-        <Input
-          label="İlan Başlığı"
-          placeholder="Başlık girin (ör. iPhone 12 Pro)"
-          value={title}
-          onChangeText={text => {
-            setTitle(text);
-            setErrors({...errors, title: undefined});
-          }}
-          error={errors.title}
-        />
+      <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false}>
+        <View style={styles.formContainer}>
+          {/* İlerleme göstergesi */}
+          <View style={styles.progressContainer}>
+            <View style={styles.progressStep}>
+              <View
+                style={[
+                  styles.progressDot,
+                  {backgroundColor: theme.colors.primary},
+                ]}
+              />
+              <Text style={{color: theme.colors.primary, fontSize: 12}}>
+                Detaylar
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.progressLine,
+                {backgroundColor: theme.colors.primary},
+              ]}
+            />
+            <View style={styles.progressStep}>
+              <View
+                style={[
+                  styles.progressDot,
+                  {backgroundColor: theme.colors.primary},
+                ]}
+              />
+              <Text style={{color: theme.colors.primary, fontSize: 12}}>
+                Konum
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.progressLine,
+                {backgroundColor: theme.colors.primary},
+              ]}
+            />
+            <View style={styles.progressStep}>
+              <View
+                style={[
+                  styles.progressDot,
+                  {backgroundColor: theme.colors.primary},
+                ]}
+              />
+              <Text style={{color: theme.colors.primary, fontSize: 12}}>
+                Görseller
+              </Text>
+            </View>
+          </View>
 
-        {/* Kategori */}
-        <View style={styles.inputContainer}>
-          <Text style={[styles.label, {color: theme.colors.text}]}>
-            Kategori
-          </Text>
-          <TouchableOpacity
-            style={[
-              styles.pickerButton,
-              {
-                borderColor: errors.category
-                  ? theme.colors.danger
-                  : theme.colors.border,
-                backgroundColor: theme.colors.white,
-              },
-            ]}
-            onPress={() => setShowCategoryPicker(true)}>
-            <Text
-              style={{
-                color: category ? theme.colors.text : theme.colors.gray,
-              }}>
-              {category || 'Kategori seçin'}
+          {/* Form Bölüm 1: İlan Bilgileri */}
+          <View style={styles.formSection}>
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+              İlan Bilgileri
             </Text>
-            <Icon name="chevron-down" size={20} color={theme.colors.gray} />
-          </TouchableOpacity>
-          {errors.category && (
-            <Text style={[styles.errorText, {color: theme.colors.danger}]}>
-              {errors.category}
-            </Text>
-          )}
-        </View>
 
-        {/* Açıklama */}
-        <Input
-          label="Açıklama"
-          placeholder="Ürün hakkında detaylı bilgi verin"
-          value={description}
-          onChangeText={text => {
-            setDescription(text);
-            setErrors({...errors, description: undefined});
-          }}
-          multiline={true}
-          numberOfLines={4}
-          error={errors.description}
-        />
+            {/* İlan Başlığı */}
+            <Input
+              label="İlan Başlığı"
+              placeholder="Başlık girin (ör. iPhone 12 Pro)"
+              value={title}
+              onChangeText={text => {
+                setTitle(text);
+                setErrors({...errors, title: undefined});
+              }}
+              error={errors.title}
+            />
 
-        {/* Şehir */}
-        <View style={styles.inputContainer}>
-          <Text style={[styles.label, {color: theme.colors.text}]}>Şehir</Text>
-          <TouchableOpacity
-            style={[
-              styles.pickerButton,
-              {
-                borderColor: errors.city
-                  ? theme.colors.danger
-                  : theme.colors.border,
-                backgroundColor: theme.colors.white,
-              },
-            ]}
-            onPress={() => setShowCityPicker(true)}>
-            <Text
-              style={{
-                color: city ? theme.colors.text : theme.colors.gray,
-              }}>
-              {city || 'Şehir seçin'}
-            </Text>
-            <Icon name="chevron-down" size={20} color={theme.colors.gray} />
-          </TouchableOpacity>
-          {errors.city && (
-            <Text style={[styles.errorText, {color: theme.colors.danger}]}>
-              {errors.city}
-            </Text>
-          )}
-        </View>
-
-        {/* Ürün Durumu */}
-        <View style={styles.inputContainer}>
-          <Text style={[styles.label, {color: theme.colors.text}]}>
-            Ürün Durumu
-          </Text>
-          <TouchableOpacity
-            style={[
-              styles.pickerButton,
-              {
-                borderColor: errors.condition
-                  ? theme.colors.danger
-                  : theme.colors.border,
-                backgroundColor: theme.colors.white,
-              },
-            ]}
-            onPress={() => setShowConditionPicker(true)}>
-            <Text
-              style={{
-                color: condition ? theme.colors.text : theme.colors.gray,
-              }}>
-              {condition || 'Durum seçin'}
-            </Text>
-            <Icon name="chevron-down" size={20} color={theme.colors.gray} />
-          </TouchableOpacity>
-          {errors.condition && (
-            <Text style={[styles.errorText, {color: theme.colors.danger}]}>
-              {errors.condition}
-            </Text>
-          )}
-        </View>
-
-        {/* Resimler */}
-        <View style={styles.inputContainer}>
-          <Text style={[styles.label, {color: theme.colors.text}]}>
-            Resimler (en fazla 5 adet)
-          </Text>
-          <View style={styles.imagesContainer}>
-            {images.map((image, index) => (
-              <View key={index} style={styles.imageItem}>
-                <Image
-                  source={{uri: image.uri}}
-                  style={styles.imageThumbnail}
-                  resizeMode="cover"
-                />
-                <TouchableOpacity
-                  style={[
-                    styles.removeImageButton,
-                    {backgroundColor: theme.colors.danger},
-                  ]}
-                  onPress={() => handleRemoveImage(index)}>
-                  <Icon name="close" size={16} color="white" />
-                </TouchableOpacity>
-              </View>
-            ))}
-            {images.length < 5 && (
+            {/* Kategori */}
+            <View style={styles.inputContainer}>
+              <Text style={[styles.label, {color: theme.colors.text}]}>
+                Kategori
+              </Text>
               <TouchableOpacity
                 style={[
-                  styles.addImageButton,
+                  styles.pickerButton,
                   {
-                    borderColor: errors.images
+                    borderColor: errors.category
                       ? theme.colors.danger
                       : theme.colors.border,
-                    backgroundColor: theme.colors.background,
+                    backgroundColor: theme.colors.white,
                   },
                 ]}
-                onPress={handleSelectImages}>
-                <Icon
-                  name="camera-plus"
-                  size={24}
-                  color={theme.colors.primary}
-                />
+                onPress={() =>
+                  openPicker('category', 'Kategori Seçin', CATEGORIES, category)
+                }>
                 <Text
-                  style={[styles.addImageText, {color: theme.colors.primary}]}>
-                  {images.length === 0 ? 'Resim Ekle' : 'Daha Ekle'}
+                  style={{
+                    color: category ? theme.colors.text : theme.colors.gray,
+                  }}>
+                  {category || 'Kategori seçin'}
                 </Text>
+                <Icon name="chevron-down" size={20} color={theme.colors.gray} />
               </TouchableOpacity>
+              {errors.category && (
+                <Text style={[styles.errorText, {color: theme.colors.danger}]}>
+                  {errors.category}
+                </Text>
+              )}
+            </View>
+
+            {/* Açıklama */}
+            <Input
+              label="Açıklama"
+              placeholder="Ürün hakkında detaylı bilgi verin"
+              value={description}
+              onChangeText={text => {
+                setDescription(text);
+                setErrors({...errors, description: undefined});
+              }}
+              multiline={true}
+              numberOfLines={4}
+              error={errors.description}
+            />
+          </View>
+
+          {/* Form Bölüm 2: Konum ve Durum */}
+          <View style={styles.formSection}>
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+              Konum ve Durum
+            </Text>
+
+            {/* Şehir */}
+            <View style={styles.inputContainer}>
+              <Text style={[styles.label, {color: theme.colors.text}]}>
+                Şehir
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.pickerButton,
+                  {
+                    borderColor: errors.city
+                      ? theme.colors.danger
+                      : theme.colors.border,
+                    backgroundColor: theme.colors.white,
+                  },
+                ]}
+                onPress={() =>
+                  openPicker('city', 'Şehir Seçin', cityOptions, city)
+                }>
+                <Text
+                  style={{
+                    color: city ? theme.colors.text : theme.colors.gray,
+                  }}>
+                  {city || 'Şehir seçin'}
+                </Text>
+                <Icon name="chevron-down" size={20} color={theme.colors.gray} />
+              </TouchableOpacity>
+              {errors.city && (
+                <Text style={[styles.errorText, {color: theme.colors.danger}]}>
+                  {errors.city}
+                </Text>
+              )}
+            </View>
+
+            {/* Ürün Durumu */}
+            <View style={styles.inputContainer}>
+              <Text style={[styles.label, {color: theme.colors.text}]}>
+                Ürün Durumu
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.pickerButton,
+                  {
+                    borderColor: errors.condition
+                      ? theme.colors.danger
+                      : theme.colors.border,
+                    backgroundColor: theme.colors.white,
+                  },
+                ]}
+                onPress={() =>
+                  openPicker('condition', 'Durum Seçin', CONDITIONS, condition)
+                }>
+                <Text
+                  style={{
+                    color: condition ? theme.colors.text : theme.colors.gray,
+                  }}>
+                  {condition || 'Durum seçin'}
+                </Text>
+                <Icon name="chevron-down" size={20} color={theme.colors.gray} />
+              </TouchableOpacity>
+              {errors.condition && (
+                <Text style={[styles.errorText, {color: theme.colors.danger}]}>
+                  {errors.condition}
+                </Text>
+              )}
+            </View>
+          </View>
+
+          {/* Form Bölüm 3: Resimler */}
+          <View style={styles.formSection}>
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+              İlan Görselleri
+            </Text>
+
+            <Text style={[styles.imageSubtitle, {color: theme.colors.gray}]}>
+              En az 1, en fazla 5 resim yükleyebilirsiniz. İlk resim ana görsel
+              olarak kullanılacaktır.
+            </Text>
+
+            <View style={styles.imagesContainer}>
+              {images.map((image, index) => (
+                <View key={index} style={styles.imageItem}>
+                  <Image
+                    source={{uri: image.uri}}
+                    style={styles.imageThumbnail}
+                    resizeMode="cover"
+                  />
+                  <TouchableOpacity
+                    style={[
+                      styles.removeImageButton,
+                      {backgroundColor: theme.colors.danger},
+                    ]}
+                    onPress={() => handleRemoveImage(index)}>
+                    <Icon name="close" size={16} color="white" />
+                  </TouchableOpacity>
+                  {index === 0 && (
+                    <View
+                      style={[
+                        styles.mainImageBadge,
+                        {backgroundColor: theme.colors.success},
+                      ]}>
+                      <Text style={{color: 'white', fontSize: 10}}>
+                        Ana Görsel
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              ))}
+              {images.length < 5 && (
+                <TouchableOpacity
+                  style={[
+                    styles.addImageButton,
+                    {
+                      borderColor: errors.images
+                        ? theme.colors.danger
+                        : theme.colors.primary,
+                      backgroundColor: theme.colors.background,
+                    },
+                  ]}
+                  onPress={handleSelectImages}>
+                  <Icon
+                    name="image-plus"
+                    size={24}
+                    color={theme.colors.primary}
+                  />
+                  <Text
+                    style={[
+                      styles.addImageText,
+                      {color: theme.colors.primary},
+                    ]}>
+                    {images.length === 0 ? 'Resim Ekle' : 'Daha Ekle'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            {errors.images && (
+              <Text style={[styles.errorText, {color: theme.colors.danger}]}>
+                {errors.images}
+              </Text>
             )}
           </View>
-          {errors.images && (
-            <Text style={[styles.errorText, {color: theme.colors.danger}]}>
-              {errors.images}
-            </Text>
-          )}
-        </View>
 
-        {/* Butonlar */}
-        <View style={styles.buttonContainer}>
-          <Button
-            title="İptal"
-            variant="outline"
-            onPress={() => navigation.goBack()}
-            style={styles.button}
-          />
-          <Button
-            title={loading ? 'Oluşturuluyor...' : 'İlanı Oluştur'}
-            onPress={handleCreateListing}
-            style={styles.button}
-            loading={loading}
-          />
+          {/* Hata varsa genel bir hata göstergesi ekleyelim */}
+          {Object.keys(errors).length > 0 && (
+            <View
+              style={[
+                styles.errorContainer,
+                {backgroundColor: theme.colors.danger + '15'},
+              ]}>
+              <Icon name="alert-circle" size={20} color={theme.colors.danger} />
+              <Text
+                style={[styles.generalErrorText, {color: theme.colors.danger}]}>
+                Lütfen formdaki hataları düzeltin ve tekrar deneyin.
+              </Text>
+            </View>
+          )}
+
+          {/* Butonlar */}
+          <View style={styles.buttonContainer}>
+            <Button
+              title="İptal"
+              variant="outline"
+              onPress={() => navigation.goBack()}
+              style={styles.button}
+            />
+            <Button
+              title={loading ? 'Oluşturuluyor...' : 'İlanı Oluştur'}
+              onPress={handleCreateListing}
+              style={[styles.button, {flex: 2}]}
+              loading={loading}
+            />
+          </View>
         </View>
       </ScrollView>
 
-      {/* Picker modals */}
-      <Picker
-        visible={showCategoryPicker}
-        title="Kategori Seçin"
-        options={CATEGORIES}
-        selectedValue={category}
-        onSelect={value => {
-          setCategory(value);
-          setErrors({...errors, category: undefined});
-        }}
-        onClose={() => setShowCategoryPicker(false)}
-      />
+      {/* Picker modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={pickerVisible}
+        onRequestClose={() => setPickerVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View
+            style={[
+              styles.pickerContainer,
+              {backgroundColor: theme.colors.background},
+            ]}>
+            <View style={styles.pickerHeader}>
+              <Text style={[styles.pickerTitle, {color: theme.colors.text}]}>
+                {pickerTitle}
+              </Text>
+              <TouchableOpacity onPress={() => setPickerVisible(false)}>
+                <Text style={{color: theme.colors.danger}}>Kapat</Text>
+              </TouchableOpacity>
+            </View>
 
-      <Picker
-        visible={showCityPicker}
-        title="Şehir Seçin"
-        options={CITIES}
-        selectedValue={city}
-        onSelect={value => {
-          setCity(value);
-          setErrors({...errors, city: undefined});
-        }}
-        onClose={() => setShowCityPicker(false)}
-      />
-
-      <Picker
-        visible={showConditionPicker}
-        title="Ürün Durumu Seçin"
-        options={CONDITIONS}
-        selectedValue={condition}
-        onSelect={value => {
-          setCondition(value);
-          setErrors({...errors, condition: undefined});
-        }}
-        onClose={() => setShowConditionPicker(false)}
-      />
+            <FlatList
+              data={pickerOptions}
+              keyExtractor={item => item}
+              renderItem={({item}) => (
+                <TouchableOpacity
+                  style={[
+                    styles.optionItem,
+                    pickerCurrentValue === item && {
+                      backgroundColor: theme.colors.primary + '20',
+                    },
+                  ]}
+                  onPress={() => handleSelect(item)}>
+                  <Text
+                    style={[
+                      styles.optionText,
+                      {color: theme.colors.text},
+                      pickerCurrentValue === item && {
+                        color: theme.colors.primary,
+                        fontWeight: 'bold',
+                      },
+                    ]}>
+                    {item}
+                  </Text>
+                  {pickerCurrentValue === item && (
+                    <Icon name="check" size={20} color={theme.colors.primary} />
+                  )}
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -507,27 +684,67 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'ios' ? 50 : 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingBottom: 8,
   },
   backButton: {
-    padding: 8,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
   },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
+  formContainer: {
     padding: 16,
     paddingBottom: 40,
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  progressStep: {
+    alignItems: 'center',
+  },
+  progressDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  progressLine: {
+    flex: 1,
+    height: 3,
+    marginHorizontal: 5,
+  },
+  formSection: {
+    marginBottom: 24,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 3.84,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  imageSubtitle: {
+    fontSize: 14,
+    marginBottom: 16,
   },
   inputContainer: {
     marginBottom: 16,
@@ -549,6 +766,17 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 12,
     marginTop: 4,
+  },
+  generalErrorText: {
+    fontSize: 14,
+    marginLeft: 8,
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
   },
   imagesContainer: {
     flexDirection: 'row',
@@ -578,6 +806,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  mainImageBadge: {
+    position: 'absolute',
+    bottom: 4,
+    left: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
   addImageButton: {
     width: 100,
     height: 100,
@@ -602,20 +838,17 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 5,
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
   pickerContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    height: '50%',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     paddingHorizontal: 16,
     paddingBottom: Platform.OS === 'ios' ? 40 : 16,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: -2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   pickerHeader: {
     flexDirection: 'row',
@@ -629,10 +862,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  pickerOptions: {
-    maxHeight: 300,
-  },
-  pickerOption: {
+  optionItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -641,7 +871,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  pickerOptionText: {
+  optionText: {
     fontSize: 16,
   },
 });

@@ -1,17 +1,22 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Wi-Fi adaptörünüzün gerçek IP adresi - bunu değiştirin
-const API_URL = 'http://192.168.64.217:3001/api';
+import {API_CONFIG} from '../config';
 
 // Axios instance oluştur
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_CONFIG.FULL_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
   timeout: 10000, // 10 saniye timeout ekleyelim
 });
+
+// Config'den görüntü URL fonksiyonlarını dışa aktar
+export const getImageUrl = API_CONFIG.getImageUrl.bind(API_CONFIG);
+export const getListingImageUrl =
+  API_CONFIG.getListingImageUrl.bind(API_CONFIG);
+export const getProfileImageUrl =
+  API_CONFIG.getProfileImageUrl.bind(API_CONFIG);
 
 // Her istekte token kontrolü
 api.interceptors.request.use(

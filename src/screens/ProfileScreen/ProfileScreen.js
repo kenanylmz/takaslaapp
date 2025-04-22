@@ -16,6 +16,7 @@ import {useUser} from '../../contexts/UserContext';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {Input, Button, Card} from '../../components/atoms';
+import {getProfileImageUrl} from '../../services/api';
 
 const ProfileScreen = ({navigation}) => {
   const {theme} = useTheme();
@@ -220,15 +221,12 @@ const ProfileScreen = ({navigation}) => {
           <View style={styles.profileImageContainer}>
             <Image
               source={
-                profileImage && profileImage !== 'default-avatar.png'
-                  ? {
-                      uri: `http://10.192.189.239:3001/uploads/profiles/${profileImage}`,
-                      // Önbellek sorununu önlemek için
-                      cache: 'reload',
-                    }
+                user?.profileImage
+                  ? {uri: getProfileImageUrl(user.profileImage)}
                   : require('../../assets/default-avatar.png')
               }
               style={styles.profileImage}
+              defaultSource={require('../../assets/default-avatar.png')}
             />
             <TouchableOpacity
               style={[

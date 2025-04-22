@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {useTheme} from '../../contexts/ThemeContext';
-import {listingService} from '../../services/api';
+import {listingService, getListingImageUrl} from '../../services/api';
 import {Button, Card} from '../../components/atoms';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -163,10 +163,18 @@ const MyListingsScreen = ({navigation}) => {
         {item.images && item.images.length > 0 ? (
           <Image
             source={{
-              uri: `http://10.192.189.239:3001/uploads/listings/${item.images[0]}`,
+              uri: getListingImageUrl(item.images[0]),
             }}
             style={styles.image}
             resizeMode="cover"
+            defaultSource={require('../../assets/default-listing.png')}
+            onError={e =>
+              console.log(
+                'Resim yükleme hatası:',
+                item.images[0],
+                e.nativeEvent.error,
+              )
+            }
           />
         ) : (
           <View

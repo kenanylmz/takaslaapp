@@ -14,7 +14,7 @@ import {
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import {useTheme} from '../../contexts/ThemeContext';
 import {Button, Input} from '../../components/atoms';
-import {listingService} from '../../services/api';
+import {listingService, getListingImageUrl} from '../../services/api';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // Kategori seçenekleri
@@ -165,7 +165,7 @@ const EditListingScreen = ({route, navigation}) => {
         // Mevcut resimleri ayarla
         if (listing.images && listing.images.length > 0) {
           const formattedImages = listing.images.map(img => ({
-            uri: `http://192.168.64.217:3001/uploads/listings/${img}`,
+            uri: getListingImageUrl(img),
             name: img,
             isExisting: true,
           }));

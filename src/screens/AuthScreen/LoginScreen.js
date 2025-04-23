@@ -213,11 +213,6 @@ const LoginScreen = ({navigation}) => {
               onChangeText={handlePasswordChange}
               secureTextEntry
             />
-            <TouchableOpacity
-              style={styles.forgotPassword}
-              onPress={goToForgotPassword}>
-              <Text style={{color: theme.colors.primary}}>Şifremi Unuttum</Text>
-            </TouchableOpacity>
           </View>
 
           <View style={{width: '100%', marginTop: 20}}>

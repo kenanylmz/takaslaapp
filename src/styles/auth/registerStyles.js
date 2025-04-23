@@ -66,6 +66,7 @@ export default StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 20,
+    marginBottom: 20,
   },
   terms: {
     marginTop: 30,

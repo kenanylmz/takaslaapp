@@ -263,17 +263,6 @@ const RegisterScreen = ({navigation}) => {
               </Text>
             ) : null}
 
-            <Text style={[styles.termsText, {color: theme.colors.gray}]}>
-              Kayıt olarak, Takasla'nın{' '}
-              <Text style={{color: theme.colors.primary}}>
-                Kullanım Şartları
-              </Text>{' '}
-              ve{' '}
-              <Text style={{color: theme.colors.primary}}>
-                Gizlilik Politikası
-              </Text>
-              'nı kabul etmiş olursunuz.
-            </Text>
           </View>
 
           <View style={styles.footer}>

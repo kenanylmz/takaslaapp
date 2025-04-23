@@ -10,6 +10,7 @@ import {
   Alert,
   RefreshControl,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import {useTheme} from '../../contexts/ThemeContext';
 import {listingService, getListingImageUrl} from '../../services/api';
@@ -22,6 +23,8 @@ const MyListingsScreen = ({navigation}) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('newest');
 
   // İlanları getir
   const fetchListings = async () => {
@@ -105,9 +108,42 @@ const MyListingsScreen = ({navigation}) => {
     </View>
   );
 
+  // Filtreleme fonksiyonu
+  const filterListings = data => {
+    if (activeFilter === 'all') return data;
+    return data.filter(item => item.status === activeFilter);
+  };
+
+  // Sıralama fonksiyonu
+  const sortListings = data => {
+    if (sortBy === 'newest') {
+      return [...data].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+      );
+    } else {
+      return [...data].sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+      );
+    }
+  };
+
+  // Görüntülenecek ilanları işle (filtreleme ve sıralama)
+  const processedListings = sortListings(filterListings(listings));
+
+  // Filtrele ve Sırala barına tıklama işleyicileri
+  const handleFilterChange = filter => {
+    setActiveFilter(filter);
+  };
+
+  const handleSortChange = sort => {
+    setSortBy(sort);
+  };
+
   // Her bir ilan kartı
   const renderItem = ({item}) => (
-    <Card style={styles.card}>
+    <Card
+      style={[styles.card, {backgroundColor: theme.colors.white}]}
+      shadowLevel="medium">
       <View style={styles.cardHeader}>
         <Text
           style={[styles.cardTitle, {color: theme.colors.text}]}
@@ -162,28 +198,33 @@ const MyListingsScreen = ({navigation}) => {
 
       <View style={styles.imageContainer}>
         {item.images && item.images.length > 0 ? (
-          <Image
-            source={{
-              uri: getListingImageUrl(item.images[0]),
-            }}
-            style={styles.image}
-            resizeMode="cover"
-            defaultSource={require('../../assets/default-listing.png')}
-            onError={e =>
-              console.log(
-                'Resim yükleme hatası:',
-                item.images[0],
-                e.nativeEvent.error,
-              )
-            }
-          />
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={true}>
+            {item.images.map((image, index) => (
+              <Image
+                key={index}
+                source={{
+                  uri: getListingImageUrl(image),
+                }}
+                style={styles.image}
+                resizeMode="cover"
+              />
+            ))}
+          </ScrollView>
         ) : (
           <View
-            style={[styles.noImage, {backgroundColor: theme.colors.border}]}>
-            <Icon name="image-off" size={40} color={theme.colors.gray} />
-            <Text style={{color: theme.colors.gray, marginTop: 5}}>
-              Resim Yok
-            </Text>
+            style={[styles.noImage, {backgroundColor: theme.colors.lightGray}]}>
+            <Text style={{color: theme.colors.gray}}>Resim yok</Text>
+          </View>
+        )}
+        {item.images && item.images.length > 1 && (
+          <View style={styles.imageCountBadge}>
+            <Text
+              style={
+                styles.imageCountText
+              }>{`${item.images.length} Resim`}</Text>
           </View>
         )}
       </View>
@@ -264,26 +305,144 @@ const MyListingsScreen = ({navigation}) => {
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.filterBar, {backgroundColor: theme.colors.white}]}>
-        <TouchableOpacity
-          style={[styles.filterButton, {borderColor: theme.colors.border}]}
-          onPress={() => {
-            /* filter işlevi */
-          }}>
-          <Icon name="filter-variant" size={16} color={theme.colors.gray} />
-          <Text style={{color: theme.colors.gray, marginLeft: 4}}>
-            Filtrele
+      <View
+        style={[styles.filterContainer, {backgroundColor: theme.colors.white}]}>
+        <View style={styles.filterTabsContainer}>
+          <Text style={[styles.filterSectionTitle, {color: theme.colors.gray}]}>
+            Durum:
           </Text>
-        </TouchableOpacity>
+          <View style={styles.tabsRow}>
+            <TouchableOpacity
+              style={[
+                styles.filterTab,
+                activeFilter === 'all' && [
+                  styles.activeTab,
+                  {borderColor: theme.colors.primary},
+                ],
+              ]}
+              onPress={() => handleFilterChange('all')}>
+              <Text
+                style={[
+                  styles.filterTabText,
+                  {
+                    color:
+                      activeFilter === 'all'
+                        ? theme.colors.primary
+                        : theme.colors.gray,
+                  },
+                ]}>
+                Tümü
+              </Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.filterButton, {borderColor: theme.colors.border}]}
-          onPress={() => {
-            /* sort işlevi */
-          }}>
-          <Icon name="sort" size={16} color={theme.colors.gray} />
-          <Text style={{color: theme.colors.gray, marginLeft: 4}}>Sırala</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.filterTab,
+                activeFilter === 'active' && [
+                  styles.activeTab,
+                  {borderColor: theme.colors.primary},
+                ],
+              ]}
+              onPress={() => handleFilterChange('active')}>
+              <Text
+                style={[
+                  styles.filterTabText,
+                  {
+                    color:
+                      activeFilter === 'active'
+                        ? theme.colors.primary
+                        : theme.colors.gray,
+                  },
+                ]}>
+                Aktif
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.filterTab,
+                activeFilter === 'inactive' && [
+                  styles.activeTab,
+                  {borderColor: theme.colors.primary},
+                ],
+              ]}
+              onPress={() => handleFilterChange('inactive')}>
+              <Text
+                style={[
+                  styles.filterTabText,
+                  {
+                    color:
+                      activeFilter === 'inactive'
+                        ? theme.colors.primary
+                        : theme.colors.gray,
+                  },
+                ]}>
+                Pasif
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.sortContainer}>
+          <Text style={[styles.filterSectionTitle, {color: theme.colors.gray}]}>
+            Sıralama:
+          </Text>
+          <View style={styles.sortOptionsRow}>
+            <TouchableOpacity
+              style={[
+                styles.sortOption,
+                sortBy === 'newest' && {backgroundColor: theme.colors.primary},
+              ]}
+              onPress={() => handleSortChange('newest')}>
+              <Icon
+                name="sort-calendar-descending"
+                size={16}
+                color={
+                  sortBy === 'newest' ? theme.colors.white : theme.colors.gray
+                }
+              />
+              <Text
+                style={[
+                  styles.sortOptionText,
+                  {
+                    color:
+                      sortBy === 'newest'
+                        ? theme.colors.white
+                        : theme.colors.gray,
+                  },
+                ]}>
+                En Yeni
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.sortOption,
+                sortBy === 'oldest' && {backgroundColor: theme.colors.primary},
+              ]}
+              onPress={() => handleSortChange('oldest')}>
+              <Icon
+                name="sort-calendar-ascending"
+                size={16}
+                color={
+                  sortBy === 'oldest' ? theme.colors.white : theme.colors.gray
+                }
+              />
+              <Text
+                style={[
+                  styles.sortOptionText,
+                  {
+                    color:
+                      sortBy === 'oldest'
+                        ? theme.colors.white
+                        : theme.colors.gray,
+                  },
+                ]}>
+                En Eski
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
       {error && (
@@ -308,7 +467,7 @@ const MyListingsScreen = ({navigation}) => {
         </View>
       ) : (
         <FlatList
-          data={listings}
+          data={processedListings}
           renderItem={renderItem}
           keyExtractor={item => item._id}
           contentContainerStyle={styles.listContainer}

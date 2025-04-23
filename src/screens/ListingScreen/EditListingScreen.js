@@ -443,49 +443,45 @@ const EditListingScreen = ({route, navigation}) => {
   }) => {
     return (
       <Modal
-        animationType="slide"
-        transparent={true}
         visible={visible}
+        transparent={true}
+        animationType="slide"
         onRequestClose={onClose}>
         <View style={styles.modalContainer}>
           <View
             style={[
               styles.pickerContainer,
-              {backgroundColor: theme.colors.background},
+              {backgroundColor: theme.colors.white},
             ]}>
-            <View style={styles.pickerHeader}>
+            <View
+              style={[
+                styles.pickerHeader,
+                {borderBottomColor: theme.colors.border},
+              ]}>
               <Text style={[styles.pickerTitle, {color: theme.colors.text}]}>
                 {title}
               </Text>
               <TouchableOpacity onPress={onClose}>
-                <Text style={{color: theme.colors.danger}}>Kapat</Text>
+                <Text style={{color: theme.colors.primary}}>Kapat</Text>
               </TouchableOpacity>
             </View>
-
             <FlatList
               data={options}
-              keyExtractor={item => item}
+              keyExtractor={item => item.value}
               renderItem={({item}) => (
                 <TouchableOpacity
                   style={[
                     styles.optionItem,
-                    selectedValue === item && {
-                      backgroundColor: theme.colors.primary + '20',
-                    },
+                    {borderBottomColor: theme.colors.border},
                   ]}
-                  onPress={() => onSelect(item)}>
-                  <Text
-                    style={[
-                      styles.optionText,
-                      {color: theme.colors.text},
-                      selectedValue === item && {
-                        color: theme.colors.primary,
-                        fontWeight: 'bold',
-                      },
-                    ]}>
-                    {item}
+                  onPress={() => {
+                    onSelect(item.value);
+                    onClose();
+                  }}>
+                  <Text style={[styles.optionText, {color: theme.colors.text}]}>
+                    {item.label}
                   </Text>
-                  {selectedValue === item && (
+                  {selectedValue === item.value && (
                     <Text style={{color: theme.colors.primary}}>✓</Text>
                   )}
                 </TouchableOpacity>
@@ -610,7 +606,10 @@ const EditListingScreen = ({route, navigation}) => {
                 openPicker(
                   'category',
                   'Kategori Seçin',
-                  categoryOptions,
+                  categoryOptions.map(item => ({
+                    value: item,
+                    label: item,
+                  })),
                   category,
                 )
               }>
@@ -653,7 +652,15 @@ const EditListingScreen = ({route, navigation}) => {
                 },
               ]}
               onPress={() =>
-                openPicker('city', 'Şehir Seçin', cityOptions, city)
+                openPicker(
+                  'city',
+                  'Şehir Seçin',
+                  cityOptions.map(item => ({
+                    value: item,
+                    label: item,
+                  })),
+                  city,
+                )
               }>
               <Text
                 style={{
@@ -681,7 +688,10 @@ const EditListingScreen = ({route, navigation}) => {
                 openPicker(
                   'condition',
                   'Ürün Durumu Seçin',
-                  conditionOptions,
+                  conditionOptions.map(item => ({
+                    value: item,
+                    label: item,
+                  })),
                   condition,
                 )
               }>

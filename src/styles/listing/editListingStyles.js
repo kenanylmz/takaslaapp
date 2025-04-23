@@ -1,0 +1,208 @@
+
+import {StyleSheet, Dimensions} from 'react-native';
+
+const {width, height} = Dimensions.get('window');
+
+export default StyleSheet.create({
+  container: {
+      flex: 1,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    formContainer: {
+      padding: 16,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingTop: 16,
+      paddingBottom: 8,
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 20,
+    },
+    headerTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+    progressContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      marginBottom: 24,
+    },
+    progressStep: {
+      alignItems: 'center',
+    },
+    progressDot: {
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      marginBottom: 4,
+    },
+    progressLine: {
+      flex: 1,
+      height: 3,
+      marginHorizontal: 5,
+    },
+    formSection: {
+      marginBottom: 24,
+      backgroundColor: 'white',
+      borderRadius: 12,
+      padding: 16,
+      shadowColor: '#000',
+      shadowOffset: {width: 0, height: 2},
+      shadowOpacity: 0.05,
+      shadowRadius: 3.84,
+      elevation: 2,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 16,
+    },
+    imageSubtitle: {
+      fontSize: 14,
+      marginBottom: 16,
+    },
+    pickerButton: {
+      height: 50,
+      borderWidth: 1,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+      flexDirection: 'row',
+    },
+    imagesContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginTop: 8,
+    },
+    imageWrapper: {
+      width: 100,
+      height: 100,
+      margin: 4,
+      borderRadius: 8,
+      overflow: 'hidden',
+      position: 'relative',
+      borderWidth: 1,
+      borderColor: '#EEEEEE',
+    },
+    image: {
+      width: '100%',
+      height: '100%',
+    },
+    removeButton: {
+      position: 'absolute',
+      top: 4,
+      right: 4,
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    addImageButton: {
+      width: 100,
+      height: 100,
+      margin: 4,
+      borderWidth: 1,
+      borderRadius: 8,
+      borderStyle: 'dashed',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    errorContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 16,
+    },
+    errorText: {
+      marginLeft: 8,
+      flex: 1,
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 20,
+      marginBottom: 30,
+    },
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    pickerContainer: {
+      height: '50%',
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+      paddingBottom: 20,
+    },
+    pickerHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: '#EEEEEE',
+    },
+    pickerTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+    },
+    optionItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: '#EEEEEE',
+    },
+    optionText: {
+      fontSize: 16,
+    },
+    actionContainer: {
+      padding: 20,
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+    },
+    actionTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+    actionButton: {
+      height: 50,
+      borderRadius: 8,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 10,
+    },
+    actionButtonText: {
+      color: 'white',
+      fontWeight: '500',
+    },
+    mainImageBadge: {
+      position: 'absolute',
+      bottom: 4,
+      left: 4,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+  });

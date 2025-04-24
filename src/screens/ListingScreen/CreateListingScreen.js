@@ -18,6 +18,7 @@ import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import {useTheme} from '../../contexts/ThemeContext';
 import {Input, Button} from '../../components/atoms';
 import {listingService} from '../../services/api';
+import {suggestionsService} from '../../services/api';
 
 const CATEGORIES = [
   'Elektronik',
@@ -307,6 +308,36 @@ const CreateListingScreen = ({navigation}) => {
       default:
         break;
     }
+  };
+
+  // Form tamam mı kontrol et
+  const isFormComplete = () => {
+    return title && category && description && condition && city;
+  };
+
+  // Takas önerilerini getiren fonksiyon
+  const handleGetSuggestions = async () => {
+    if (!isFormComplete()) {
+      Alert.alert(
+        'Eksik Bilgi',
+        'Takas önerileri için tüm ürün bilgilerini girmeniz gerekiyor.',
+      );
+      return;
+    }
+
+    // Ürün bilgilerini hazırla
+    const listingData = {
+      title,
+      category,
+      description,
+      condition,
+      city,
+    };
+
+    console.log('Takas önerileri için hazırlanan veriler:', listingData);
+
+    // Yeni ekrana veri ile birlikte yönlendir
+    navigation.navigate('SuggestionResult', {listingData});
   };
 
   return (
@@ -599,8 +630,26 @@ const CreateListingScreen = ({navigation}) => {
               <Icon name="alert-circle" size={20} color={theme.colors.danger} />
               <Text
                 style={[styles.generalErrorText, {color: theme.colors.danger}]}>
-                Lütfen formdaki hataları düzeltin ve tekrar deneyin.
+                Lütfen formdaki tüm verileri doldurunuz.
               </Text>
+            </View>
+          )}
+
+          {/* En altına AI öneri butonunu ekleyin */}
+          {isFormComplete() && (
+            <View style={styles.aiSuggestionContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.suggestionButton,
+                  {backgroundColor: theme.colors.primary},
+                ]}
+                onPress={handleGetSuggestions}>
+                <Icon name="autorenew" size={24} color="#FFF" />
+                <Text style={styles.suggestionButtonText}>
+                  Yapay Zeka ile Takas Önerileri Al
+                </Text>
+              </TouchableOpacity>
+           
             </View>
           )}
 

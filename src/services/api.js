@@ -237,4 +237,80 @@ export const listingService = {
   },
 };
 
+// Takas önerileri için servis
+export const suggestionsService = {
+  // Yeni ilan için takas önerileri al
+  async getNewListingSuggestions(listingData) {
+    try {
+      console.log('API: Takas önerisi isteği gönderiliyor:', listingData);
+      const response = await api.post('/suggestions', listingData);
+      console.log('API Yanıtı:', response.status, response.config.url);
+
+      if (response.data) {
+        if (response.data.success && response.data.suggestions) {
+          console.log(
+            'API: Takas önerileri başarıyla alındı:',
+            response.data.suggestions,
+          );
+          return response.data.suggestions;
+        } else if (response.data.suggestions) {
+          // Bazen success false olsa bile suggestions gelmiş olabilir
+          console.log(
+            'API: Takas önerileri alındı (success olmadan):',
+            response.data.suggestions,
+          );
+          return response.data.suggestions;
+        } else {
+          console.log('API: Yanıtta suggestions yok:', response.data);
+          throw new Error(
+            response.data?.message || 'Takas önerileri alınamadı',
+          );
+        }
+      } else {
+        console.log('API: Yanıt verisi yok');
+        throw new Error('API yanıt vermedi');
+      }
+    } catch (error) {
+      console.error('API hatası:', error.message || error);
+      throw error;
+    }
+  },
+
+  // Mevcut ilan için takas önerileri al
+  async getListingSuggestions(listingId) {
+    try {
+      console.log(`API: ${listingId} ID'li ilan için takas önerisi isteniyor`);
+      const response = await api.get(`/suggestions/${listingId}`);
+      console.log('API Yanıtı:', response.status, response.config.url);
+
+      if (response.data) {
+        if (response.data.success && response.data.suggestions) {
+          console.log(
+            'API: Takas önerileri başarıyla alındı:',
+            response.data.suggestions,
+          );
+          return response.data.suggestions;
+        } else if (response.data.suggestions) {
+          console.log(
+            'API: Takas önerileri alındı (success olmadan):',
+            response.data.suggestions,
+          );
+          return response.data.suggestions;
+        } else {
+          console.log('API: Yanıtta suggestions yok:', response.data);
+          throw new Error(
+            response.data?.message || 'Takas önerileri alınamadı',
+          );
+        }
+      } else {
+        console.log('API: Yanıt verisi yok');
+        throw new Error('API yanıt vermedi');
+      }
+    } catch (error) {
+      console.error('API hatası:', error.message || error);
+      throw error;
+    }
+  },
+};
+
 export default api;

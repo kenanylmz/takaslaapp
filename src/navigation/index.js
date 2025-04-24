@@ -24,6 +24,7 @@ import ProfileScreen from '../screens/ProfileScreen/ProfileScreen';
 import MyListingsScreen from '../screens/ListingScreen/MyListingsScreen';
 import CreateListingScreen from '../screens/ListingScreen/CreateListingScreen';
 import EditListingScreen from '../screens/ListingScreen/EditListingScreen';
+import SuggestionResultScreen from '../screens/ListingScreen/SuggestionResultScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -56,13 +57,20 @@ const TemporaryDashboard = () => {
 const ListingStack = createStackNavigator();
 const ListingNavigator = () => {
   return (
-    <ListingStack.Navigator screenOptions={{headerShown: false}}>
+    <ListingStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}>
       <ListingStack.Screen name="MyListings" component={MyListingsScreen} />
       <ListingStack.Screen
         name="CreateListing"
         component={CreateListingScreen}
       />
       <ListingStack.Screen name="EditListing" component={EditListingScreen} />
+      <ListingStack.Screen
+        name="SuggestionResult"
+        component={SuggestionResultScreen}
+      />
     </ListingStack.Navigator>
   );
 };

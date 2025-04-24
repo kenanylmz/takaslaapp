@@ -3,7 +3,7 @@ export const API_CONFIG = {
   // API temel URL
   //BASE_URL: 'http://10.0.2.2:3001', // Android Emülatör için
   // BASE_URL: 'http://localhost:3001', // iOS Simulator için
-  BASE_URL: 'http://192.168.64.217:3001', // Gerçek cihaz için IP adresinizi kullanın
+  BASE_URL: 'http://192.168.161.213:3001', // Gerçek cihaz için IP adresinizi kullanın
 
   // API endpoint'leri
   API_URL: '/api',

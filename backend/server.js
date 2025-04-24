@@ -41,6 +41,7 @@ if (!fs.existsSync(listingsUploadDir)) {
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/profile', require('./routes/profileRoutes'));
 app.use('/api/listings', require('./routes/listingRoutes'));
+app.use('/api/suggestions', require('./routes/suggestionRoutes'));
 
 // Root endpoint
 app.get('/', (req, res) => {

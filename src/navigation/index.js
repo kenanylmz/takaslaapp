@@ -25,6 +25,8 @@ import MyListingsScreen from '../screens/ListingScreen/MyListingsScreen';
 import CreateListingScreen from '../screens/ListingScreen/CreateListingScreen';
 import EditListingScreen from '../screens/ListingScreen/EditListingScreen';
 import SuggestionResultScreen from '../screens/ListingScreen/SuggestionResultScreen';
+import ExploreScreen from '../screens/ListingScreen/ExploreScreen';
+import ListingDetailScreen from '../screens/ListingScreen/ListingDetailScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -71,7 +73,28 @@ const ListingNavigator = () => {
         name="SuggestionResult"
         component={SuggestionResultScreen}
       />
+      <ListingStack.Screen
+        name="ListingDetail"
+        component={ListingDetailScreen}
+      />
     </ListingStack.Navigator>
+  );
+};
+
+// Explore Stack Navigator
+const ExploreStack = createStackNavigator();
+const ExploreNavigator = () => {
+  return (
+    <ExploreStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}>
+      <ExploreStack.Screen name="ExploreMain" component={ExploreScreen} />
+      <ExploreStack.Screen
+        name="ListingDetail"
+        component={ListingDetailScreen}
+      />
+    </ExploreStack.Navigator>
   );
 };
 
@@ -105,7 +128,7 @@ const MainNavigator = () => {
       />
       <Tab.Screen
         name="Search"
-        component={TemporaryDashboard}
+        component={ExploreNavigator}
         options={{
           tabBarLabel: 'Keşfet',
           tabBarIcon: ({color, size}) => (

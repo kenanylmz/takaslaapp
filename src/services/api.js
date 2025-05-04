@@ -150,6 +150,24 @@ export const listingService = {
     return response.data;
   },
 
+  // İlanları ara ve filtrele
+  searchListings: async params => {
+    const {category, search, city, page = 1, limit = 10} = params || {};
+    const queryParams = new URLSearchParams();
+
+    if (category && category !== 'Tümü')
+      queryParams.append('category', category);
+    if (search) queryParams.append('search', search);
+    if (city) queryParams.append('city', city);
+    if (page) queryParams.append('page', page);
+    if (limit) queryParams.append('limit', limit);
+
+    const response = await api.get(
+      `/listings/search?${queryParams.toString()}`,
+    );
+    return response.data;
+  },
+
   // Kullanıcının kendi ilanlarını getir
   getMyListings: async () => {
     const response = await api.get('/listings/my/listings');

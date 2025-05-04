@@ -9,6 +9,7 @@ const {
   updateListing,
   deleteListing,
   deleteImage,
+  searchListings,
 } = require('../controllers/listingController');
 const multer = require('multer');
 const path = require('path');
@@ -44,6 +45,7 @@ const upload = multer({
 
 // Public rotalar
 router.get('/', getListings);
+router.get('/search', searchListings);
 router.get('/:id', getListingById);
 
 // Private rotalar

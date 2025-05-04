@@ -33,12 +33,15 @@ const getMyListings = async (req, res) => {
   }
 };
 
-// @desc    İlan detaylarını getir
+// @desc    Belirli ID'ye sahip ilanı getir
 // @route   GET /api/listings/:id
 // @access  Public
 const getListingById = async (req, res) => {
   try {
-    const listing = await Listing.findById(req.params.id);
+    const listing = await Listing.findById(req.params.id).populate({
+      path: 'user',
+      select: 'name profileImage createdAt',
+    });
 
     if (!listing) {
       return res.status(404).json({message: 'İlan bulunamadı'});
@@ -186,6 +189,61 @@ const deleteImage = async (req, res) => {
   }
 };
 
+// @desc    İlanları kategoriye ve arama terimine göre filtrele
+// @route   GET /api/listings/search
+// @access  Public
+const searchListings = async (req, res) => {
+  try {
+    const {category, search, city, page = 1, limit = 10} = req.query;
+    const skip = (page - 1) * limit;
+
+    // Filtreleme için sorgu oluştur
+    const query = {status: 'active'};
+
+    // Kullanıcı giriş yapmışsa kendi ilanlarını gösterme
+    if (req.user) {
+      query.user = {$ne: req.user._id};
+    }
+
+    // Kategori filtresi
+    if (category && category !== 'Tümü') {
+      query.category = category;
+    }
+
+    // Şehir filtresi
+    if (city) {
+      query.city = city;
+    }
+
+    // Arama filtresi (başlık veya açıklamada)
+    if (search) {
+      query.$or = [
+        {title: {$regex: search, $options: 'i'}},
+        {description: {$regex: search, $options: 'i'}},
+      ];
+    }
+
+    // Toplam ilan sayısını al
+    const total = await Listing.countDocuments(query);
+
+    // İlanları getir
+    const listings = await Listing.find(query)
+      .sort({createdAt: -1})
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('user', 'name profileImage');
+
+    res.json({
+      listings,
+      totalPages: Math.ceil(total / limit),
+      currentPage: parseInt(page),
+      total,
+    });
+  } catch (error) {
+    res.status(500).json({message: 'Sunucu hatası', error: error.message});
+  }
+};
+
 module.exports = {
   getListings,
   getMyListings,
@@ -194,4 +252,5 @@ module.exports = {
   updateListing,
   deleteListing,
   deleteImage,
+  searchListings,
 };

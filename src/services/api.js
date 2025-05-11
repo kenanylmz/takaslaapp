@@ -1,6 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {API_CONFIG} from '../config';
+import messageService from './messageService';
 
 // Axios instance oluştur
 const api = axios.create({
@@ -330,5 +331,8 @@ export const suggestionsService = {
     }
   },
 };
+
+// Export message service
+export {messageService};
 
 export default api;

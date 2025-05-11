@@ -20,6 +20,7 @@ import {
 } from '../../services/api';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Card, Button} from '../../components/atoms';
+import {startConversation} from '../../services/messageService';
 
 const {width} = Dimensions.get('window');
 
@@ -41,7 +42,7 @@ const ListingDetailScreen = ({route, navigation}) => {
         setError(null);
         const data = await listingService.getListingById(listingId);
         setListing(data);
-        
+
         // API'dan gelen verileri kontrol edip log'a yazdıralım (geliştirme aşamasında)
         console.log('Listing data:', data);
         console.log('User data:', data.user);
@@ -57,17 +58,41 @@ const ListingDetailScreen = ({route, navigation}) => {
   }, [listingId]);
 
   // İlan sahibi ile iletişim
-  const handleContact = () => {
-    // İlan sahibinin telefonu varsa ara, yoksa mesaj bölümüne yönlendir
-    if (listing.user.phone) {
-      Linking.openURL(`tel:${listing.user.phone}`);
-    } else {
-      // Burada mesaj bölümüne yönlendirme yapılabilir
+  const handleContact = async () => {
+    // Check if user is authenticated
+    if (!user) {
       Alert.alert(
-        'Bilgi',
-        'Kullanıcı mesaj bölümünden iletişime geçebilirsiniz.',
+        'Giriş Yapın',
+        'İlan sahibiyle iletişime geçmek için giriş yapmalısınız.',
+        [
+          {
+            text: 'Tamam',
+            onPress: () => navigation.navigate('Login'),
+          },
+        ],
       );
-      // navigation.navigate('Chat', { userId: listing.user._id });
+      return;
+    }
+
+    try {
+      // Start a conversation and navigate to the chat screen
+      const conversation = await startConversation(
+        authState.token,
+        listing.user._id,
+      );
+      navigation.navigate('Messages', {
+        screen: 'ChatScreen',
+        params: {
+          conversationId: conversation._id,
+          receiver: conversation.participants[0],
+        },
+      });
+    } catch (error) {
+      console.error('Conversation error:', error);
+      Alert.alert(
+        'Hata',
+        'Konuşma başlatılırken bir hata oluştu. Lütfen tekrar deneyin.',
+      );
     }
   };
 
@@ -278,12 +303,15 @@ const ListingDetailScreen = ({route, navigation}) => {
                 {listing.user?.name || 'Kullanıcı'}
               </Text>
               <Text style={[styles.userJoined, {color: theme.colors.gray}]}>
-                {listing.user?.createdAt ? 
-                  new Date(listing.user.createdAt).toLocaleDateString('tr-TR', {
-                    year: 'numeric',
-                    month: 'long',
-                  }) + ' tarihinden beri üye' : 
-                  'Üyelik bilgisi yok'}
+                {listing.user?.createdAt
+                  ? new Date(listing.user.createdAt).toLocaleDateString(
+                      'tr-TR',
+                      {
+                        year: 'numeric',
+                        month: 'long',
+                      },
+                    ) + ' tarihinden beri üye'
+                  : 'Üyelik bilgisi yok'}
               </Text>
             </View>
           </View>

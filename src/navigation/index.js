@@ -27,6 +27,7 @@ import EditListingScreen from '../screens/ListingScreen/EditListingScreen';
 import SuggestionResultScreen from '../screens/ListingScreen/SuggestionResultScreen';
 import ExploreScreen from '../screens/ListingScreen/ExploreScreen';
 import ListingDetailScreen from '../screens/ListingScreen/ListingDetailScreen';
+import {ConversationsScreen, ChatScreen} from '../screens/MessagingScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -98,6 +99,23 @@ const ExploreNavigator = () => {
   );
 };
 
+// Messaging Stack Navigator
+const MessagingStack = createStackNavigator();
+const MessagingNavigator = () => {
+  return (
+    <MessagingStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}>
+      <MessagingStack.Screen
+        name="Conversations"
+        component={ConversationsScreen}
+      />
+      <MessagingStack.Screen name="ChatScreen" component={ChatScreen} />
+    </MessagingStack.Navigator>
+  );
+};
+
 // Ana Tab Navigator
 const MainNavigator = () => {
   const {theme} = useTheme();
@@ -148,7 +166,7 @@ const MainNavigator = () => {
       />
       <Tab.Screen
         name="Messages"
-        component={TemporaryDashboard}
+        component={MessagingNavigator}
         options={{
           tabBarLabel: 'Mesajlar',
           tabBarIcon: ({color, size}) => (
